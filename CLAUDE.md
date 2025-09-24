@@ -24,25 +24,24 @@ npm run generate-sdk
 
 ## Project Architecture
 
-This is a Next.js application that demonstrates integration with the Sensay AI API through a chat interface.
+This is Segmante, a Shopify AI Agent built with Next.js that integrates Shopify stores with Sensay AI platform to create intelligent product assistants.
 
 ### Key Components
 
-1. **Chat Interface**: Located at `src/components/ChatInterface.tsx`, this component provides the main UI for interacting with the Sensay AI API, including:
-   - Managing chat messages and state
-   - Handling streaming chat responses
-   - API key configuration
-   - Error handling
+1. **Shopify Integration**:
+   - `src/lib/shopify/client.ts`: Shopify Admin API client
+   - `src/components/shopify/connection-form.tsx`: Store connection UI
+   - `src/app/api/shopify/`: Server-side API routes for CORS resolution
 
-2. **Sensay SDK**: Generated TypeScript client for the Sensay API
-   - Located in `src/sensay-sdk/`
-   - Automatically generated using OpenAPI TypeScript Codegen
-   - Provides typed interfaces for API interactions
+2. **AI Intelligence**:
+   - `src/lib/sensay/product-sync.ts`: Product data synchronization service
+   - `src/lib/sensay/replica-manager.ts`: AI replica session management
+   - `src/components/ChatInterface.tsx`: Intelligent chat interface
 
-3. **App Structure**:
-   - `src/app/page.tsx`: Main page with tabbed interface for chat demo and code examples
-   - `src/components/CodeBlock.tsx`: Component for rendering code examples
-   - `src/components/RedeemKeyModal.tsx`: Modal for API key redemption
+3. **Modern UI/UX**:
+   - `src/components/floating-header.tsx`: Professional navigation
+   - `src/app/(dashboard)/`: Dashboard, stores, chat, and settings pages
+   - Built with shadcn/ui components and Tailwind CSS
 
 ### Key Dependencies
 
@@ -77,12 +76,29 @@ This project implements a Shopify Product AI Agent using the Sensay platform. Fo
 
 The application requires:
 - Node.js >= 18.17.0 (v20+ recommended)
-- A Sensay AI API key
-- (Optional) Shopify store access token for product management features
+- A Sensay AI API key for AI functionality
+- Shopify store with Admin API access for product integration
 
 Environment variables are set in `.env.local`:
 ```
-SENSAY_API_KEY_SECRET=your_api_key_here
-SHOPIFY_ACCESS_TOKEN=your_shopify_token_here
+NEXT_PUBLIC_SENSAY_API_KEY_SECRET=your_sensay_api_key_here
 SHOPIFY_DOMAIN=your-store.myshopify.com
+SHOPIFY_ACCESS_TOKEN=shpat_your_shopify_private_app_token_here
 ```
+
+## Core Features
+
+### 🛍️ Shopify Store Integration
+- Connect any Shopify store using domain and private app token
+- Real-time product synchronization with comprehensive data extraction
+- Support for complex products with multiple variants and inventory tracking
+
+### 🤖 AI-Powered Product Assistant
+- Natural language conversations about products and inventory
+- RAG-powered knowledge base with vectorized product information
+- Context-aware responses with smart product recommendations
+
+### 📊 Professional Dashboard
+- Modern UI built with shadcn/ui components
+- Real-time sync progress tracking with visual feedback
+- Dark/light theme support with automatic detection

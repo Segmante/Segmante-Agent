@@ -1,319 +1,351 @@
-# Sensay AI Chat Client Sample
+# 🛍️ Segmante - Shopify AI Agent
 
-A sample Next.js application demonstrating how to integrate with the Sensay AI API. This project showcases a simple chat interface for communicating with Sensay Wisdom AI through their REST OpenAPI.
+<div align="center">
 
-![Demo Screenshot](./public/screenshot.png)
+![Segmante](https://img.shields.io/badge/Segmante-Shopify%20AI%20Agent-green?style=for-the-badge)
+![Next.js](https://img.shields.io/badge/Next.js-14.0+-black?style=for-the-badge&logo=next.js)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue?style=for-the-badge&logo=typescript)
+![Status](https://img.shields.io/badge/Status-Production%20Ready-brightgreen?style=for-the-badge)
 
-## ✨ Features
+<br/>
 
-- Modern React application built with Next.js and TypeScript
-- Responsive chat interface with automatic user and replica management
-- Clean, responsive UI using Tailwind CSS
-- Typed API client for the Sensay AI API
-- Code examples for quick integration
-- Environment variable support for API keys
+### **Transform your Shopify store into an intelligent AI-powered product assistant**
 
-## 🛠️ Tech Stack
+*Built with ❤️ using [Sensay AI](https://sensay.io) and [Shopify Admin API](https://shopify.dev/)*
 
-- **Framework**: Next.js with TypeScript
-- **Styling**: Tailwind CSS
-- **API SDK**: openapi-typescript-codegen
-- **HTTP Client**: Fetch API
-- **Code Highlighting**: react-syntax-highlighter
+<br/>
 
-## 📋 Prerequisites
+![Segmante Logo](public/segmante-logo.png)
 
-- Node.js 18+ and npm/yarn
-- A Sensay AI API key
+**Powered by:**
 
-### Node.js Version Management
+<img src="public/sensay-logo.jpg" alt="Sensay AI" width="120" style="margin: 0 20px;"/>
+<img src="https://cdn.worldvectorlogo.com/logos/shopify.svg" alt="Shopify" width="120" style="margin: 0 20px;"/>
 
-This project works best with Node.js v18+ or v20+. We recommend using [fnm](https://github.com/Schniz/fnm) (Fast Node Manager) to manage your Node.js versions:
+</div>
 
-#### Installing fnm
+---
 
+## 🌟 **What is Segmante?**
+
+Segmante is a revolutionary Shopify AI Agent that bridges your Shopify store with advanced AI technology. It automatically syncs your product catalog to create an intelligent assistant that can answer customer questions, provide product recommendations, check inventory, and help with sales inquiries - all through natural conversation.
+
+### 🎯 **Key Benefits**
+
+- **🤖 24/7 Customer Support**: AI assistant available round-the-clock
+- **📊 Real-time Inventory**: Always up-to-date stock information
+- **🎯 Smart Recommendations**: AI-powered product suggestions
+- **💬 Natural Conversations**: Chat naturally about products and inventory
+- **⚡ Zero Setup Time**: Connect your store in minutes, not hours
+- **🔄 Auto-Sync**: Products automatically synchronized with knowledge base
+
+---
+
+## 🚀 **Features Overview**
+
+### 🏪 **Store Connection**
+- **One-Click Integration**: Connect your Shopify store with just domain and access token
+- **Secure Authentication**: Uses Shopify Admin API with proper security practices
+- **Connection Validation**: Real-time testing of store credentials
+- **Multiple Stores**: Support for connecting multiple Shopify stores
+
+### 📦 **Product Intelligence**
+- **Complete Catalog Sync**: Automatically imports all products, variants, and details
+- **Rich Product Data**: Includes pricing, inventory, descriptions, SKUs, and categories
+- **Variant Support**: Handles complex products with multiple variants (sizes, colors, etc.)
+- **Inventory Tracking**: Real-time stock levels and availability status
+
+### 🧠 **AI-Powered Assistant**
+- **Natural Language Queries**: Ask questions in plain English
+- **Context-Aware Responses**: Understands product relationships and customer intent
+- **Advanced Search**: Find products by name, category, price range, or any attribute
+- **Smart Recommendations**: Suggests related or complementary products
+
+### 💡 **Intelligent Conversations**
+
+**Example Interactions:**
+```
+👤 "What snowboards do you have in stock?"
+🤖 "I have 9 snowboards currently available, ranging from $600 to $2,629..."
+
+👤 "Do you have any products under $50?"
+🤖 "Yes! I found the Sample Selling Plans Ski Wax for $9.95 and..."
+
+👤 "Tell me about the Complete Snowboard variants"
+🤖 "The Complete Snowboard comes in 5 variants: Ice, Dawn, Powder..."
+```
+
+### 📊 **Professional Dashboard**
+- **Modern UI/UX**: Built with shadcn/ui components and Tailwind CSS
+- **Dark/Light Theme**: Automatic theme switching with user preference
+- **Responsive Design**: Works perfectly on desktop, tablet, and mobile
+- **Real-time Sync Progress**: Visual feedback during product synchronization
+
+---
+
+## 🏗️ **System Architecture**
+
+```mermaid
+graph TB
+    subgraph "User Interface"
+        A[Shopify Connection Form]
+        B[Chat Interface]
+        C[Product Dashboard]
+    end
+
+    subgraph "Next.js Application"
+        D[API Routes]
+        E[Shopify Client]
+        F[Sensay Integration]
+    end
+
+    subgraph "External APIs"
+        G[Shopify Admin API]
+        H[Sensay AI Platform]
+    end
+
+    subgraph "AI Knowledge Base"
+        I[Product Vectors]
+        J[RAG Search Engine]
+    end
+
+    A --> D
+    B --> D
+    C --> D
+    D --> E
+    D --> F
+    E --> G
+    F --> H
+    H --> I
+    I --> J
+    J --> B
+```
+
+---
+
+## ⚡ **Quick Start**
+
+### 📋 **Prerequisites**
+
+- **Node.js 18+** (v20+ recommended)
+- **Shopify Store** with Admin access
+- **Sensay AI API Key** ([Get yours here](https://sensay.io))
+
+### 🛠️ **Installation**
+
+1. **Clone the repository:**
 ```bash
-# Using Homebrew on macOS
-brew install fnm
-
-# Using curl on macOS or Linux
-curl -fsSL https://fnm.vercel.app/install | bash
+git clone https://github.com/your-org/segmante.git
+cd segmante
 ```
 
-#### Using fnm with this project
-
-```bash
-# Install Node.js v20 (LTS)
-fnm install 20
-
-# Use Node.js v20 for this project
-cd /path/to/sensay-chat-client-sample
-fnm use 20
-
-# Alternatively, you can use the exact version specified in .node-version
-fnm use
-```
-
-⚠️ **Important**: This project requires Node.js >= 18.17.0. If you're seeing errors about Node.js version compatibility, make sure to run:
-
-```bash
-# Check your current Node.js version
-node -v
-
-# If you see a version lower than 18.17.0, switch to a compatible version
-fnm use 20
-# or
-fnm use 18.17.0
-```
-
-You can also create a `.node-version` or `.nvmrc` file in the project root to automatically set the Node.js version when entering the directory (requires additional shell setup).
-
-## ❓ Troubleshooting
-
-### Node.js Version Errors
-
-If you encounter the following error when running `npm run dev`:
-
-```
-You are using Node.js 18.12.0. For Next.js, Node.js version >= v18.17.0 is required.
-```
-
-This means you need to upgrade your Node.js version. Run the following commands:
-
-```bash
-# Install a compatible version if needed
-fnm install 20
-
-# Switch to the compatible version
-fnm use 20
-
-# Verify the version is now correct
-node -v
-```
-
-Then try running the development server again:
-
-```bash
-npm run dev
-```
-
-## 🚀 Getting Started
-
-### Installation
-
-1. Clone the repository:
-
-```bash
-git clone https://github.com/sensay-io/chat-client-sample.git
-cd chat-client-sample
-```
-
-2. Install dependencies:
-
+2. **Install dependencies:**
 ```bash
 npm install
-# or
-yarn install
 ```
 
-3. Create a `.env.local` file in the root directory and add your API key:
-
+3. **Environment setup:**
+```bash
+cp .env.local.example .env.local
 ```
-NEXT_PUBLIC_SENSAY_API_KEY_SECRET=your_api_key_here
+
+Edit `.env.local`:
+```env
+NEXT_PUBLIC_SENSAY_API_KEY_SECRET=your_sensay_api_key_here
 ```
 
-4. Start the development server:
-
+4. **Start development server:**
 ```bash
 npm run dev
-# or
-yarn dev
 ```
 
-5. Open [http://localhost:3000](http://localhost:3000) in your browser.
+5. **Open your browser:**
+Navigate to [http://localhost:3000](http://localhost:3000)
 
-## 📚 API Client Usage
+### 🎉 **That's it!** You're ready to connect your Shopify store and start chatting with your AI agent.
 
-### Initialization
+---
 
-```typescript
-import { SensayAPI } from '@/sensay-sdk';
-import { SAMPLE_USER_ID, SAMPLE_REPLICA_SLUG, API_VERSION } from '@/constants/auth';
+## 🎮 **How to Use**
 
-// Initialize organization-only client (no user authentication)
-const orgClient = new SensayAPI({
-  HEADERS: {
-    'X-ORGANIZATION-SECRET': process.env.NEXT_PUBLIC_SENSAY_API_KEY_SECRET
-  }
-});
+### Step 1: Connect Your Store
+1. Navigate to the "Stores" tab
+2. Enter your Shopify store domain (e.g., `your-store.myshopify.com`)
+3. Provide your Admin API access token
+4. Click "Connect Store"
 
-// Use user-authenticated client for operations
-const client = new SensayAPI({
-  HEADERS: {
-    'X-ORGANIZATION-SECRET': process.env.NEXT_PUBLIC_SENSAY_API_KEY_SECRET,
-    'X-USER-ID': SAMPLE_USER_ID
-  }
-});
+### Step 2: Sync Products
+1. Wait for the connection validation
+2. Products will automatically sync to the AI knowledge base
+3. Monitor progress with the real-time progress bar
+4. Sync completes when vectorization is finished
+
+### Step 3: Chat with Your AI
+1. Go to the "Chat" tab
+2. Ask questions about your products naturally:
+   - "What's in stock?"
+   - "Show me products under $100"
+   - "Tell me about the snowboard variants"
+   - "What's the most expensive item?"
+
+### Step 4: Manage & Monitor
+1. Use the Dashboard to view connected stores
+2. Monitor sync status and product counts
+3. Re-sync products when inventory changes
+4. Manage multiple store connections
+
+---
+
+## 🔧 **Tech Stack**
+
+| Category | Technology | Purpose |
+|----------|------------|---------|
+| **Frontend** | Next.js 14 | React framework with App Router |
+| **Language** | TypeScript | Type-safe development |
+| **Styling** | Tailwind CSS + shadcn/ui | Modern, responsive UI |
+| **State Management** | React Hooks | Component state management |
+| **HTTP Client** | Fetch API + Axios | API communication |
+| **AI Platform** | Sensay AI | Knowledge base and chat completions |
+| **E-commerce** | Shopify Admin API | Product data synchronization |
+| **Validation** | Zod + React Hook Form | Form validation and handling |
+
+---
+
+## 📚 **API Integration**
+
+### Sensay AI APIs Used:
+- **Chat Completions**: `/v1/replicas/{uuid}/chat/completions`
+- **Knowledge Base**: `/v1/replicas/{uuid}/training`
+- **Replica Management**: `/v1/replicas`
+- **User Management**: `/v1/users`
+
+### Shopify APIs Used:
+- **Products**: `/admin/api/2023-10/products.json`
+- **Shop Info**: `/admin/api/2023-10/shop.json`
+- **Product Count**: `/admin/api/2023-10/products/count.json`
+- **Inventory**: `/admin/api/2023-10/inventory_levels.json`
+
+---
+
+## 🏪 **Shopify Setup Guide**
+
+### Getting Your Store Domain & Access Token
+
+#### 1. **Find Your Store Domain**
+Your Shopify store domain follows this format:
 ```
-
-### User and Replica Management
-
-```typescript
-// Check if user exists
-let userExists = false;
-try {
-  await orgClient.users.getV1Users(SAMPLE_USER_ID);
-  userExists = true;
-} catch (error) {
-  console.log('User does not exist, will create');
-}
-
-// Create user if needed
-if (!userExists) {
-  await orgClient.users.postV1Users(API_VERSION, {
-    id: SAMPLE_USER_ID,
-    email: `${SAMPLE_USER_ID}@example.com`,
-    name: "Sample User"
-  });
-}
-
-// List replicas to find our sample replica
-const replicas = await client.replicas.getV1Replicas();
-let replicaId;
-
-// Look for the sample replica by slug
-if (replicas.items && replicas.items.length > 0) {
-  const sampleReplica = replicas.items.find(replica => 
-    replica.slug === SAMPLE_REPLICA_SLUG
-  );
-  if (sampleReplica) {
-    replicaId = sampleReplica.uuid;
-  }
-}
-
-// Create the sample replica if it doesn't exist
-if (!replicaId) {
-  const newReplica = await client.replicas.postV1Replicas(API_VERSION, {
-    name: "Sample Replica",
-    shortDescription: "A sample replica for demonstration",
-    greeting: "Hello, I'm the sample replica. How can I help you today?",
-    slug: SAMPLE_REPLICA_SLUG,
-    ownerID: SAMPLE_USER_ID,
-    llm: {
-      model: "claude-3-7-sonnet-latest",
-      memoryMode: "prompt-caching",
-      systemMessage: "You are a helpful AI assistant that provides clear and concise responses."
-    }
-  });
-  replicaId = newReplica.uuid;
-}
+your-store-name.myshopify.com
 ```
+You can find it in your Shopify admin URL or store settings.
 
-### Creating a Chat Completion
+#### 2. **Create a Private App for API Access**
 
-```typescript
-// Standard chat completion
-const response = await client.chatCompletions.postV1ReplicasChatCompletions(
-  replicaId,
-  API_VERSION,
-  {
-    content: 'Hello, how can you help me today?',
-    source: 'web',
-    skip_chat_history: false
-  }
-);
+**Step-by-step instructions:**
 
-console.log(response.content);
-```
+1. **Login to Shopify Admin**
+   - Go to your store's admin panel
+   - Navigate to **Apps** section
 
-### OpenAI-Compatible Endpoint (experimental)
+2. **Manage Private Apps**
+   - Click **"Apps and sales channels"** → **"Develop apps for your store"**
+   - If you don't see this option, go to **Settings** → **Apps and sales channels** → **Develop apps**
 
-```typescript
-// Using the OpenAI-compatible experimental endpoint
-const response = await client.chatCompletions.postV1ExperimentalReplicasChatCompletions(
-  replicaId,
-  {
-    messages: [
-      { role: 'system', content: 'You are a helpful assistant.' },
-      { role: 'user', content: 'Hello, how can you help me today?' }
-    ],
-    source: 'web',
-    store: true
-  }
-);
+3. **Create New App**
+   - Click **"Create an app"**
+   - Enter app name: `"AI Product Assistant"`
+   - Enter developer email (your email)
 
-console.log(response.choices[0].message.content);
-```
+4. **Configure Admin API Access**
+   - Click **"Configure Admin API scopes"**
+   - Enable these permissions:
+     - ✅ `read_products` - Read products
+     - ✅ `read_product_listings` - Read product listings
+     - ✅ `read_inventory` - Read inventory levels
+     - ✅ `read_locations` - Read store locations
 
-## 📝 Environment Variables
+5. **Generate Access Token**
+   - Click **"Save"** to save permissions
+   - Click **"Install app"**
+   - Copy the **Admin API access token** (starts with `shpat_`)
 
-| Variable                           | Description                               | Required |
-|------------------------------------|-------------------------------------------|----------|
-| `NEXT_PUBLIC_SENSAY_API_KEY_SECRET`| Your Sensay API key                       | No       |
+#### 3. **Security Best Practices**
 
-Note: No replica UUID is needed - the application will automatically create or reuse a replica at runtime.
-## 🔧 Project Structure
+⚠️ **Important Security Notes:**
+- **Never share your access token** publicly or commit it to version control
+- **Use environment variables** to store sensitive credentials
+- **Regularly rotate tokens** for enhanced security
+- **Monitor API usage** in your Shopify admin
 
-```
-/
-├── public/             # Static assets
-├── src/                # Source code
-│   ├── app/            # Next.js App Router
-│   │   ├── page.tsx    # Home page with demo
-│   │   └── layout.tsx  # Root layout
-│   ├── components/     # React components
-│   │   ├── ChatInterface.tsx  # Chat UI component
-│   │   ├── CodeBlock.tsx      # Code display component
-│   │   ├── RedeemKeyModal.tsx # API key redemption modal
-│   │   └── EnvChecker.tsx     # Environment variable checker
-│   ├── constants/      # Application constants
-│   │   └── auth.ts     # Authentication constants
-│   ├── sensay-sdk/     # Generated Sensay API SDK
-│   │   ├── index.ts    # SDK entry point
-│   │   ├── models/     # SDK model types
-│   │   ├── services/   # SDK service implementations
-│   │   └── core/       # SDK core utilities
-│   └── styles/         # Global styles
-│       └── globals.css # Tailwind CSS imports
-├── .env.local          # Environment variables (create this)
-├── .env.local.example  # Example environment file
-├── tsconfig.json       # TypeScript configuration
-├── next.config.js      # Next.js configuration
-├── tailwind.config.js  # Tailwind CSS configuration
-└── package.json        # Project dependencies and scripts
-```
+#### 4. **Testing Your Credentials**
 
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-## 📜 License
-
-Distributed under the MIT License. See `LICENSE` for more information.
-
-## 🔗 Links
-
-- [Sensay AI Website](https://sensay.io)
-- [Sensay AI API Documentation](https://docs.sensay.io)
-- [Next.js Documentation](https://nextjs.org/docs)
-- [Tailwind CSS Documentation](https://tailwindcss.com/docs)
-
-## 🔄 Updating the SDK
-
-This project uses the [openapi-typescript-codegen](https://github.com/ferdikoomen/openapi-typescript-codegen) library to generate TypeScript clients from the Sensay OpenAPI schema. The generated SDK is stored in the `src/sensay-sdk` directory.
-
-To update the SDK when the API changes, run the provided npm script:
+Before using the app, verify your credentials:
 
 ```bash
-npm run generate-sdk
+curl -X GET "https://YOUR_STORE.myshopify.com/admin/api/2023-10/shop.json" \
+  -H "X-Shopify-Access-Token: YOUR_ACCESS_TOKEN"
 ```
 
-This will:
-1. Fetch the latest OpenAPI schema from `https://api.sensay.io/schema`
-2. Generate fully typed TypeScript client code in the `src/sensay-sdk` directory
-3. Create service classes for each API endpoint group
-4. Provide type definitions for all request and response objects
+If successful, you'll see your shop information returned.
+
+#### 5. **Common Issues & Solutions**
+
+| Issue | Solution |
+|-------|----------|
+| **401 Unauthorized** | Check access token is correct and has proper permissions |
+| **403 Forbidden** | Enable required API scopes in your private app |
+| **404 Not Found** | Verify store domain is correct (include `.myshopify.com`) |
+| **Rate Limiting** | Shopify has API rate limits - app handles this automatically |
+
+---
+
+## 🤝 **Contributing**
+
+We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.md) for details.
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit changes (`git commit -m 'Add amazing feature'`)
+4. Push to branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+---
+
+## 📝 **License**
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+## 🔗 **Resources & Documentation**
+
+- 📖 [Full Documentation](./docs)
+- 🏗️ [Architecture Guide](./ARCHITECTURE.md)
+- 🔌 [API Reference](./API.md)
+- 🛍️ [Shopify Admin API](https://shopify.dev/api/admin-rest)
+- 🤖 [Sensay AI Platform](https://sensay.io)
+- ⚛️ [Next.js Documentation](https://nextjs.org/docs)
+
+---
+
+## 🆘 **Support**
+
+- 🐛 **Issues**: [GitHub Issues](https://github.com/your-org/segmante/issues)
+- 💬 **Discussions**: [GitHub Discussions](https://github.com/your-org/segmante/discussions)
+- 📧 **Email**: support@segmante.com
+- 📚 **Documentation**: [docs.segmante.com](https://docs.segmante.com)
+
+---
+
+<div align="center">
+
+### **Ready to transform your Shopify store with AI?**
+
+**[🚀 Get Started Now](#-quick-start) | [📖 View Documentation](./docs) | [🤝 Join Community](https://github.com/your-org/segmante/discussions)**
+
+---
+
+*Built with ❤️ by developers, for developers*
+
+**[⭐ Star this repo](https://github.com/your-org/segmante) if you find it helpful!**
+
+</div>

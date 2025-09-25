@@ -135,6 +135,62 @@ export class ReplicaService {
   }
 
   /**
+   * Get detailed knowledge base content by ID
+   */
+  async getKnowledgeBaseDetails(knowledgeBaseId: number): Promise<{
+    id: number;
+    replicaUuid: string;
+    type: string;
+    status: string;
+    rawText: string;
+    filename?: string;
+    createdAt?: string;
+    updatedAt?: string;
+  } | null> {
+    try {
+      const response = await this.sensayClient.training.getV1Training1(
+        knowledgeBaseId,
+        API_VERSION
+      );
+
+      if (!response || !response.id) {
+        return null;
+      }
+
+      return {
+        id: response.id,
+        replicaUuid: response.replica_uuid || '',
+        type: response.type || 'text',
+        status: response.status || 'BLANK',
+        rawText: response.raw_text || '',
+        filename: response.filename || undefined,
+        createdAt: response.created_at,
+        updatedAt: response.updated_at
+      };
+    } catch (error) {
+      console.error('Error fetching knowledge base details:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Delete a knowledge base by ID
+   */
+  async deleteKnowledgeBase(knowledgeBaseId: number): Promise<boolean> {
+    try {
+      const response = await this.sensayClient.training.deleteV1Training(
+        knowledgeBaseId,
+        API_VERSION
+      );
+
+      return response.success === true;
+    } catch (error) {
+      console.error('Error deleting knowledge base:', error);
+      return false;
+    }
+  }
+
+  /**
    * Extract product count from knowledge base text
    */
   private extractProductCount(rawText?: string): number | undefined {

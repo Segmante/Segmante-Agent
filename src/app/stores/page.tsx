@@ -1,23 +1,81 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Store, Zap, AlertCircle, CheckCircle, ArrowRight, Database, Bot } from 'lucide-react';
-import { ShopifyConnectionForm } from '@/components/shopify/connection-form';
+import { Store, Zap, AlertCircle, CheckCircle, ArrowRight, Database, Bot, RefreshCw } from 'lucide-react';
+import SmartConnectionForm from '@/components/shopify/smart-connection-form';
+import SyncSuccessCelebration from '@/components/shopify/sync-success-celebration';
 import { KnowledgeBaseList } from '@/components/knowledge-base-list';
 import { ReplicaList } from '@/components/replica-list';
 import { ShopifyConnectionStatus } from '@/lib/shopify/types';
+import { ShopifyConnectionPersistence } from '@/lib/shopify/connection-persistence';
 
 export default function StoresPage() {
   const [connectionStatus, setConnectionStatus] = useState<ShopifyConnectionStatus | null>(null);
   const [showConnectionForm, setShowConnectionForm] = useState(true);
+  const [showCelebration, setShowCelebration] = useState(false);
+  const [syncResults, setSyncResults] = useState<any>(null);
   const [activeTab, setActiveTab] = useState<'connection' | 'replicas' | 'knowledge'>('connection');
+  const [connectionSummary, setConnectionSummary] = useState<any>(null);
 
-  const handleConnectionSuccess = (status: ShopifyConnectionStatus) => {
+  // Load connection state on mount
+  useEffect(() => {
+    const summary = ShopifyConnectionPersistence.getConnectionSummary();
+    setConnectionSummary(summary);
+
+    if (summary.isConnected) {
+      setConnectionStatus({
+        connected: true,
+        domain: summary.domain!,
+        shopName: summary.domain!,
+        lastSync: summary.lastSync!
+      });
+
+      // Only show form if user wants to make changes
+      setShowConnectionForm(false);
+    }
+  }, []);
+
+  const handleConnectionSuccess = (status: ShopifyConnectionStatus & {
+    productCount?: number;
+    knowledgeBaseId?: number;
+    replicaUuid?: string;
+    userId?: string;
+    wasSkipped?: boolean;
+  }) => {
     setConnectionStatus(status);
+    setSyncResults(status);
     setShowConnectionForm(false);
+
+    // Update connection summary
+    const summary = ShopifyConnectionPersistence.getConnectionSummary();
+    setConnectionSummary(summary);
+
+    // Show celebration if products were synced (not just verified)
+    if (!status.wasSkipped && status.productCount && status.productCount > 0) {
+      setShowCelebration(true);
+    }
+  };
+
+  const handleShowConnectionForm = () => {
+    setShowConnectionForm(true);
+    setShowCelebration(false);
+  };
+
+  const handleDisconnect = () => {
+    ShopifyConnectionPersistence.clearConnection();
+    setConnectionStatus(null);
+    setConnectionSummary(null);
+    setShowConnectionForm(true);
+    setShowCelebration(false);
+  };
+
+  const handleGetStarted = () => {
+    // Navigate to chat page or close celebration
+    setShowCelebration(false);
+    // Could add navigation here: router.push('/chat');
   };
 
   return (
@@ -61,10 +119,10 @@ export default function StoresPage() {
               <Store className="h-5 w-5 text-blue-400" />
             </div>
             <div className="text-3xl font-bold text-white mb-2">
-              {connectionStatus?.connected ? '1' : '0'}
+              {connectionSummary?.isConnected ? '1' : '0'}
             </div>
             <p className="text-sm text-gray-400">
-              {connectionStatus?.connected ? 'Store active' : 'No stores yet'}
+              {connectionSummary?.isConnected ? connectionSummary.domain : 'No stores connected'}
             </p>
           </div>
 
@@ -73,36 +131,56 @@ export default function StoresPage() {
               <h3 className="text-sm font-medium text-gray-300">Products Synced</h3>
               <Zap className="h-5 w-5 text-purple-400" />
             </div>
-            <div className="text-3xl font-bold text-white mb-2">0</div>
-            <p className="text-sm text-gray-400">Ready for sync</p>
+            <div className="text-3xl font-bold text-white mb-2">
+              {connectionSummary?.productCount || 0}
+            </div>
+            <p className="text-sm text-gray-400">
+              {connectionSummary?.productCount ? 'Products in AI knowledge' : 'Ready for sync'}
+            </p>
           </div>
 
           <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur border border-slate-700 rounded-2xl p-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-sm font-medium text-gray-300">Last Sync</h3>
-              {connectionStatus?.connected ? (
+              {connectionSummary?.isConnected ? (
                 <CheckCircle className="h-5 w-5 text-green-400" />
               ) : (
                 <AlertCircle className="h-5 w-5 text-gray-500" />
               )}
             </div>
             <div className="text-3xl font-bold text-white mb-2">
-              {connectionStatus?.connected ? 'Now' : 'Never'}
+              {connectionSummary?.lastSync
+                ? new Date(connectionSummary.lastSync).toLocaleDateString()
+                : 'Never'
+              }
             </div>
             <p className="text-sm text-gray-400">
-              {connectionStatus?.connected ? 'Sync successful' : 'Connect first'}
+              {connectionSummary?.canSkipSync
+                ? '✅ Data is current'
+                : connectionSummary?.isConnected
+                  ? '⚠️ Consider updating'
+                  : 'Connect first'
+              }
             </p>
           </div>
 
           <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur border border-slate-700 rounded-2xl p-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-sm font-medium text-gray-300">AI Knowledge</h3>
-              <Badge className="bg-green-500/20 border-green-500/30 text-green-400 text-xs">
-                Ready
+              <Badge className={`text-xs ${
+                connectionSummary?.productCount
+                  ? 'bg-green-500/20 border-green-500/30 text-green-400'
+                  : 'bg-gray-500/20 border-gray-500/30 text-gray-400'
+              }`}>
+                {connectionSummary?.productCount ? 'Ready' : 'Waiting'}
               </Badge>
             </div>
-            <div className="text-3xl font-bold text-white mb-2">100%</div>
-            <p className="text-sm text-gray-400">Sensay AI active</p>
+            <div className="text-3xl font-bold text-white mb-2">
+              {connectionSummary?.productCount ? '100%' : '0%'}
+            </div>
+            <p className="text-sm text-gray-400">
+              {connectionSummary?.productCount ? 'AI assistant active' : 'Sync products first'}
+            </p>
           </div>
         </div>
 
@@ -152,24 +230,71 @@ export default function StoresPage() {
             {/* Connection Form or Connected Store Info */}
             {showConnectionForm ? (
               <div className="flex justify-center mb-16">
-                <div className="w-full max-w-2xl">
-                  <ShopifyConnectionForm onConnectionSuccess={handleConnectionSuccess} />
+                <div className="w-full max-w-4xl">
+                  <SmartConnectionForm onConnectionSuccess={handleConnectionSuccess} />
+                </div>
+              </div>
+            ) : showCelebration && syncResults ? (
+              <div className="flex justify-center mb-16">
+                <div className="w-full max-w-4xl">
+                  <SyncSuccessCelebration
+                    productCount={syncResults.productCount || 0}
+                    storeName={syncResults.shopName || syncResults.domain || 'Your Store'}
+                    knowledgeBaseId={syncResults.knowledgeBaseId}
+                    onGetStarted={handleGetStarted}
+                  />
                 </div>
               </div>
             ) : (
-              connectionStatus && (
+              connectionSummary?.isConnected && (
                 <div className="bg-gradient-to-br from-green-500/10 to-emerald-500/10 backdrop-blur border border-green-500/30 rounded-3xl p-12 text-center mb-16">
                   <div className="flex items-center justify-center w-20 h-20 mx-auto bg-green-500/20 rounded-full mb-6">
                     <CheckCircle className="h-10 w-10 text-green-400" />
                   </div>
                   <h3 className="text-2xl font-bold text-white mb-4">
-                    Store Connected Successfully!
+                    Store Connected & Ready!
                   </h3>
                   <p className="text-gray-300 text-lg max-w-md mx-auto mb-6">
-                    {connectionStatus.domain && `Connected to ${connectionStatus.domain}`}
+                    Connected to {connectionSummary.domain} • {connectionSummary.productCount || 0} products in AI knowledge
                   </p>
-                  <p className="text-gray-400">
-                    Your products are now available to your AI agent. Start chatting to test the integration!
+
+                  <div className="flex items-center justify-center space-x-4 mb-6">
+                    <Badge variant="outline" className="border-green-500/30 text-green-300">
+                      <Bot className="w-3 h-3 mr-1" />
+                      AI Ready
+                    </Badge>
+                    {connectionSummary.canSkipSync && (
+                      <Badge variant="outline" className="border-blue-500/30 text-blue-300">
+                        <Database className="w-3 h-3 mr-1" />
+                        Data Current
+                      </Badge>
+                    )}
+                  </div>
+
+                  <div className="flex items-center justify-center space-x-4">
+                    <Button
+                      onClick={handleShowConnectionForm}
+                      variant="outline"
+                      className="border-slate-600 text-gray-300 hover:bg-slate-700 hover:text-white"
+                    >
+                      <RefreshCw className="w-4 h-4 mr-2" />
+                      Update Connection
+                    </Button>
+                    <Button
+                      onClick={handleDisconnect}
+                      variant="outline"
+                      className="border-red-600 text-red-300 hover:bg-red-700 hover:text-white"
+                    >
+                      Disconnect Store
+                    </Button>
+                  </div>
+
+                  <p className="text-gray-400 text-sm mt-6">
+                    Your AI assistant is ready to help customers!
+                    {connectionSummary.canSkipSync
+                      ? ' No sync needed - data is current.'
+                      : ' Consider refreshing data if products changed recently.'
+                    }
                   </p>
                 </div>
               )

@@ -5,32 +5,74 @@ import EnhancedChatInterface from '@/components/EnhancedChatInterface';
 import { ReplicaList } from '@/components/replica-list';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { MessageSquare, Bot, Zap, ArrowRight, Users, Settings, AlertTriangle } from 'lucide-react';
+import { MessageSquare, Bot, Zap, ArrowRight, Users, Settings, AlertTriangle, Store } from 'lucide-react';
 import { ReplicaInfo } from '@/lib/services/replica-service';
 import { UserSessionManager } from '@/lib/user-session';
+import { ShopifyConnectionPersistence } from '@/lib/shopify/connection-persistence';
 
 export default function ChatPage() {
   const [showReplicaSelection, setShowReplicaSelection] = useState(false);
   const [selectedReplica, setSelectedReplica] = useState<ReplicaInfo | null>(null);
   const [shopifyConfig, setShopifyConfig] = useState<{domain: string; accessToken: string} | null>(null);
   const [isEnhancedMode, setIsEnhancedMode] = useState(false);
+  const [connectionSummary, setConnectionSummary] = useState<any>(null);
 
   // Check for Shopify configuration on mount
   useEffect(() => {
-    // Try to get Shopify config from environment variables
-    const domain = process.env.NEXT_PUBLIC_SHOPIFY_DOMAIN;
-    const accessToken = process.env.NEXT_PUBLIC_SHOPIFY_ACCESS_TOKEN;
+    // First, try to get from our connection persistence system
+    const connectionState = ShopifyConnectionPersistence.getConnection();
+    const summary = ShopifyConnectionPersistence.getConnectionSummary();
 
-    if (domain && accessToken) {
-      const config = {
-        domain,
-        accessToken
-      };
-      setShopifyConfig(config);
-      setIsEnhancedMode(true);
-      console.log('🛍️ Shopify configuration loaded for enhanced mode');
+    setConnectionSummary(summary);
+
+    if (connectionState && connectionState.isConnected) {
+      // We have a persisted Shopify connection - get access token from .env
+      const accessToken = process.env.NEXT_PUBLIC_SHOPIFY_ACCESS_TOKEN;
+
+      if (accessToken) {
+        const config = {
+          domain: connectionState.domain,
+          accessToken
+        };
+        setShopifyConfig(config);
+        setIsEnhancedMode(true);
+        console.log('🛍️ Shopify configuration loaded from persistence:', {
+          domain: connectionState.domain,
+          productCount: connectionState.productCount,
+          lastSync: connectionState.lastSync
+        });
+
+        // CRITICAL: Sync user session if missing but connection exists
+        const userSession = UserSessionManager.getUserSession();
+        if (!userSession && connectionState.replicaUuid && connectionState.userId) {
+          UserSessionManager.saveUserSession({
+            userId: connectionState.userId,
+            replicaUuid: connectionState.replicaUuid,
+            shopifyDomain: connectionState.domain,
+            storeName: connectionState.shopName || connectionState.domain,
+            createdAt: connectionState.connectionTimestamp || new Date().toISOString()
+          });
+          console.log('🔄 Synced user session from existing connection for chat access');
+        }
+      } else {
+        console.warn('⚠️ Connection found but no access token in environment');
+      }
     } else {
-      console.log('ℹ️ No Shopify configuration found, using conversation-only mode');
+      // Fallback to environment variables only (legacy)
+      const domain = process.env.NEXT_PUBLIC_SHOPIFY_DOMAIN;
+      const accessToken = process.env.NEXT_PUBLIC_SHOPIFY_ACCESS_TOKEN;
+
+      if (domain && accessToken) {
+        const config = {
+          domain,
+          accessToken
+        };
+        setShopifyConfig(config);
+        setIsEnhancedMode(true);
+        console.log('🛍️ Shopify configuration loaded from environment (legacy mode)');
+      } else {
+        console.log('ℹ️ No Shopify configuration found, using conversation-only mode');
+      }
     }
   }, []);
 
@@ -72,7 +114,16 @@ export default function ChatPage() {
           </p>
 
           {/* Enhanced Mode Indicator */}
-          {isEnhancedMode ? (
+          {isEnhancedMode && connectionSummary?.isConnected ? (
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-500/10 to-blue-500/10 border border-green-500/20 rounded-full">
+              <Zap className="w-4 h-4 text-green-400" />
+              <span className="text-sm text-green-300 font-medium">Enhanced Mode Active</span>
+              <div className="flex items-center gap-1 text-xs text-gray-400">
+                <Store className="w-3 h-3" />
+                <span>{connectionSummary.domain} • {connectionSummary.productCount || 0} products</span>
+              </div>
+            </div>
+          ) : isEnhancedMode ? (
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-500/10 to-blue-500/10 border border-green-500/20 rounded-full">
               <Zap className="w-4 h-4 text-green-400" />
               <span className="text-sm text-green-300 font-medium">Enhanced Mode Active</span>
@@ -82,7 +133,7 @@ export default function ChatPage() {
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-yellow-500/10 border border-yellow-500/20 rounded-full">
               <AlertTriangle className="w-4 h-4 text-yellow-400" />
               <span className="text-sm text-yellow-300 font-medium">Conversation Mode Only</span>
-              <span className="text-xs text-gray-400">• Connect Shopify for actions</span>
+              <span className="text-xs text-gray-400">• Connect Shopify in stores page for actions</span>
             </div>
           )}
 

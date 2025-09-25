@@ -11,6 +11,8 @@ import { VerboseSensayAPI } from '@/api-debug';
 import { SAMPLE_USER_ID, API_VERSION } from '@/constants/auth';
 import { MessageSquare, AlertTriangle, CheckCircle, Clock, Settings, Zap } from 'lucide-react';
 import { UserSessionManager } from '@/lib/user-session';
+import { ShopifyConnectionPersistence } from '@/lib/shopify/connection-persistence';
+import { SensayUserManager } from '@/lib/sensay/user-manager';
 
 // Enhanced imports for dual-mode functionality
 import { IntentDetectionService, IntentDetectionResult, ActionIntent } from '@/lib/ai/intent-detector';
@@ -64,11 +66,39 @@ const EnhancedChatInterface: React.FC<EnhancedChatInterfaceProps> = ({
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  /**
+   * Get the correct user ID based on shopify configuration
+   * This matches the authentication system used in sync process
+   */
+  const getAuthenticatedUserId = (): string => {
+    // First, try user session (preferred)
+    const userSession = UserSessionManager.getUserSession();
+    if (userSession && userSession.userId) {
+      console.log('🔑 Using user ID from session:', userSession.userId);
+      return userSession.userId;
+    }
+
+    // Second, try to generate from shopify config
+    if (shopifyConfig) {
+      const userManager = new SensayUserManager('dummy-key');
+      const generatedUserId = userManager.generateUserId(shopifyConfig.domain, shopifyConfig.accessToken);
+      console.log('🔑 Generated user ID from shopify config:', {
+        domain: shopifyConfig.domain,
+        userId: generatedUserId,
+        accessTokenPreview: shopifyConfig.accessToken.substring(0, 10) + '...'
+      });
+      return generatedUserId;
+    }
+
+    // Last resort: use sample user ID (but this will likely fail)
+    console.warn('⚠️ Using SAMPLE_USER_ID as fallback - this may cause connection issues');
+    return SAMPLE_USER_ID;
+  };
+
   // Initialize enhanced services when API key and replica are ready
   useEffect(() => {
     if (localApiKey && replicaUuid && shopifyConfig) {
-      const userSession = UserSessionManager.getUserSession();
-      const userId = userSession?.userId || SAMPLE_USER_ID;
+      const userId = getAuthenticatedUserId();
 
       // Initialize Sensay analyzer
       const analyzer = new SensayIntentAnalyzer(localApiKey, replicaUuid, userId);
@@ -178,9 +208,9 @@ const EnhancedChatInterface: React.FC<EnhancedChatInterfaceProps> = ({
       }
 
       // Build execution context
-      const userSession = UserSessionManager.getUserSession();
+      const userId = getAuthenticatedUserId();
       const context: ExecutionContext = {
-        userId: userSession?.userId || SAMPLE_USER_ID,
+        userId,
         storeInfo: {
           domain: shopifyConfig?.domain || 'unknown',
           name: 'Your Store'
@@ -245,9 +275,8 @@ const EnhancedChatInterface: React.FC<EnhancedChatInterfaceProps> = ({
       setCurrentMode('conversation');
       setIsActionMode(false);
 
-      // Use existing session initialization
-      const userSession = UserSessionManager.getUserSession();
-      const userId = userSession?.userId || SAMPLE_USER_ID;
+      // Use existing session initialization with proper authentication
+      const userId = getAuthenticatedUserId();
 
       const client = new VerboseSensayAPI({
         HEADERS: {
@@ -443,22 +472,105 @@ const EnhancedChatInterface: React.FC<EnhancedChatInterfaceProps> = ({
   };
 
   /**
-   * Initialize session (from original ChatInterface)
+   * Initialize session with smart fallback to connection persistence
    */
   const initializeSession = async (client: VerboseSensayAPI): Promise<string> => {
-    // Use existing session initialization logic
+    // First, try user session (preferred)
     const userSession = UserSessionManager.getUserSession();
-    if (userSession) {
+    if (userSession && userSession.replicaUuid) {
+      console.log('🟢 Using replica from user session:', userSession.replicaUuid);
       setReplicaUuid(userSession.replicaUuid);
       return userSession.replicaUuid;
     }
 
+    // Second, try from current state
     if (replicaUuid) {
+      console.log('🟡 Using replica from state:', replicaUuid);
       return replicaUuid;
     }
 
-    // Simplified initialization for demo
-    throw new Error('Please connect your Shopify store first');
+    // CRITICAL FIX: Fallback to connection persistence with proper user ID verification
+    console.log('🔄 No replica in session, checking connection persistence...');
+    const connectionState = ShopifyConnectionPersistence.getConnection();
+
+    console.log('📋 Connection state details:', {
+      hasConnection: !!connectionState,
+      isConnected: connectionState?.isConnected,
+      hasReplicaUuid: !!connectionState?.replicaUuid,
+      hasUserId: !!connectionState?.userId,
+      domain: connectionState?.domain,
+      replicaUuid: connectionState?.replicaUuid,
+      userId: connectionState?.userId,
+      productCount: connectionState?.productCount,
+      knowledgeBaseId: connectionState?.knowledgeBaseId
+    });
+
+    if (connectionState && connectionState.replicaUuid && connectionState.userId) {
+      // CRITICAL: Verify the user ID matches our authentication system
+      const expectedUserId = getAuthenticatedUserId();
+
+      console.log('🔍 Verifying user ID match:', {
+        expected: expectedUserId,
+        found: connectionState.userId,
+        domain: connectionState.domain
+      });
+
+      if (connectionState.userId === expectedUserId) {
+        console.log('🟢 Found matching replica from connection persistence:', connectionState.replicaUuid);
+
+        // Save to user session for future use
+        UserSessionManager.saveUserSession({
+          userId: connectionState.userId,
+          replicaUuid: connectionState.replicaUuid,
+          shopifyDomain: connectionState.domain,
+          storeName: connectionState.shopName || connectionState.domain,
+          createdAt: new Date().toISOString()
+        });
+
+        setReplicaUuid(connectionState.replicaUuid);
+        return connectionState.replicaUuid;
+      } else {
+        console.warn('⚠️ Connection user ID mismatch - this may indicate a different user or outdated data');
+      }
+    }
+
+    // Last resort: Try to find/create replica based on current shopify config
+    if (shopifyConfig && localApiKey) {
+      console.log('🔄 No stored replica found, attempting to find/create replica...');
+
+      try {
+        const userManager = new SensayUserManager(localApiKey);
+        const userResult = await userManager.getOrCreateUserReplica(
+          shopifyConfig.domain,
+          shopifyConfig.accessToken,
+          shopifyConfig.domain
+        );
+
+        if (userResult.success && userResult.replicaUuid && userResult.userId) {
+          console.log('🟢 Found/created replica:', {
+            userId: userResult.userId,
+            replicaUuid: userResult.replicaUuid
+          });
+
+          // Save to user session for future use
+          UserSessionManager.saveUserSession({
+            userId: userResult.userId,
+            replicaUuid: userResult.replicaUuid,
+            shopifyDomain: shopifyConfig.domain,
+            storeName: shopifyConfig.domain,
+            createdAt: new Date().toISOString()
+          });
+
+          setReplicaUuid(userResult.replicaUuid);
+          return userResult.replicaUuid;
+        }
+      } catch (error) {
+        console.error('❌ Failed to find/create replica:', error);
+      }
+    }
+
+    // Ultimate fallback: Error with guidance
+    throw new Error('No AI replica found. Please go to the Stores page and connect your Shopify store to create an AI assistant.');
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {

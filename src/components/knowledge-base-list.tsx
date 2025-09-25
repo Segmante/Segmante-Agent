@@ -19,6 +19,8 @@ import {
   RefreshCw
 } from 'lucide-react';
 import { KnowledgeBaseInfo, ReplicaService } from '@/lib/services/replica-service';
+import { KnowledgeBaseDetailsModal } from '@/components/knowledge-base-details-modal';
+import { KnowledgeBaseDeleteModal } from '@/components/knowledge-base-delete-modal';
 
 interface KnowledgeBaseListProps {
   apiKey: string;
@@ -34,6 +36,12 @@ export function KnowledgeBaseList({ apiKey, replicaUuid, showActions = false }: 
   const [knowledgeBases, setKnowledgeBases] = useState<EnrichedKnowledgeBase[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedKB, setSelectedKB] = useState<KnowledgeBaseInfo | null>(null);
+
+  // Modal states
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [selectedKnowledgeBaseId, setSelectedKnowledgeBaseId] = useState<number | null>(null);
+  const [knowledgeBaseToDelete, setKnowledgeBaseToDelete] = useState<EnrichedKnowledgeBase | null>(null);
 
   useEffect(() => {
     fetchKnowledgeBases();
@@ -103,6 +111,29 @@ export function KnowledgeBaseList({ apiKey, replicaUuid, showActions = false }: 
       hour: '2-digit',
       minute: '2-digit'
     });
+  };
+
+  // CRUD Action Handlers
+  const handleViewDetails = (knowledgeBase: EnrichedKnowledgeBase) => {
+    setSelectedKnowledgeBaseId(knowledgeBase.id);
+    setShowDetailsModal(true);
+  };
+
+  const handleDeleteClick = (knowledgeBase: EnrichedKnowledgeBase) => {
+    setKnowledgeBaseToDelete(knowledgeBase);
+    setShowDeleteModal(true);
+  };
+
+  const handleDeleteSuccess = () => {
+    // Refresh the knowledge base list after successful deletion
+    fetchKnowledgeBases();
+  };
+
+  const handleCloseModals = () => {
+    setShowDetailsModal(false);
+    setShowDeleteModal(false);
+    setSelectedKnowledgeBaseId(null);
+    setKnowledgeBaseToDelete(null);
   };
 
   if (loading) {
@@ -251,6 +282,7 @@ export function KnowledgeBaseList({ apiKey, replicaUuid, showActions = false }: 
                     variant="outline"
                     size="sm"
                     className="border-slate-600 text-gray-300 hover:bg-slate-700"
+                    onClick={() => handleViewDetails(kb)}
                   >
                     <Eye className="h-4 w-4 mr-2" />
                     View Details
@@ -260,6 +292,10 @@ export function KnowledgeBaseList({ apiKey, replicaUuid, showActions = false }: 
                       variant="outline"
                       size="sm"
                       className="border-blue-500/30 text-blue-400 hover:bg-blue-500/10"
+                      onClick={() => {
+                        // TODO: Implement resync functionality
+                        console.log('Resync KB:', kb.id);
+                      }}
                     >
                       <RefreshCw className="h-4 w-4 mr-2" />
                       Resync
@@ -269,6 +305,7 @@ export function KnowledgeBaseList({ apiKey, replicaUuid, showActions = false }: 
                     variant="outline"
                     size="sm"
                     className="border-red-500/30 text-red-400 hover:bg-red-500/10 ml-auto"
+                    onClick={() => handleDeleteClick(kb)}
                   >
                     <Trash2 className="h-4 w-4 mr-2" />
                     Delete
@@ -279,6 +316,31 @@ export function KnowledgeBaseList({ apiKey, replicaUuid, showActions = false }: 
           </Card>
         ))}
       </div>
+
+      {/* Modals */}
+      {selectedKnowledgeBaseId && (
+        <KnowledgeBaseDetailsModal
+          isOpen={showDetailsModal}
+          onClose={handleCloseModals}
+          knowledgeBaseId={selectedKnowledgeBaseId}
+          apiKey={apiKey}
+        />
+      )}
+
+      {knowledgeBaseToDelete && (
+        <KnowledgeBaseDeleteModal
+          isOpen={showDeleteModal}
+          onClose={handleCloseModals}
+          onDeleted={handleDeleteSuccess}
+          knowledgeBase={{
+            id: knowledgeBaseToDelete.id,
+            replicaName: knowledgeBaseToDelete.replicaName,
+            productCount: knowledgeBaseToDelete.productCount,
+            status: knowledgeBaseToDelete.status
+          }}
+          apiKey={apiKey}
+        />
+      )}
     </div>
   );
 }

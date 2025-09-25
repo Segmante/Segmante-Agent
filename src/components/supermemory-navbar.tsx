@@ -5,8 +5,6 @@ import Link from "next/link"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Navbar, NavBody, NavItems, MobileNav, MobileNavHeader, MobileNavToggle, MobileNavMenu } from "@/components/ui/resizable-navbar"
-import { Github, Twitter } from "lucide-react"
-
 const navigationItems = [
   { name: "Dashboard", link: "/" },
   { name: "Chat", link: "/chat" },
@@ -26,9 +24,8 @@ export function SuperMemoryNavbar() {
             <Image
               src="/segmante.webp"
               alt="Segmante"
-              width={120}
-              height={40}
-              className="h-8 w-auto"
+              width={200}
+              height={50}
               priority
             />
           </Link>
@@ -38,27 +35,9 @@ export function SuperMemoryNavbar() {
 
           {/* Right side actions */}
           <div className="flex items-center space-x-4 relative z-20">
-            {/* Social Links */}
-            <div className="hidden lg:flex items-center space-x-2">
-              <a href="https://github.com" target="_blank" rel="noopener noreferrer">
-                <Button variant="ghost" size="icon" className="h-9 w-9 text-gray-400 hover:text-white">
-                  <Github className="h-4 w-4" />
-                </Button>
-              </a>
-              <div className="flex items-center space-x-1 text-gray-400 text-sm">
-                <Github className="h-3 w-3" />
-                <span>11K</span>
-              </div>
-              <a href="https://twitter.com" target="_blank" rel="noopener noreferrer">
-                <Button variant="ghost" size="icon" className="h-9 w-9 text-gray-400 hover:text-white">
-                  <Twitter className="h-4 w-4" />
-                </Button>
-              </a>
-              <div className="flex items-center space-x-1 text-gray-400 text-sm">
-                <Twitter className="h-3 w-3" />
-                <span>8.6K</span>
-              </div>
-            </div>
+
+             
+
 
             {/* CTA Button */}
             <Button className="bg-white text-black hover:bg-gray-100 font-medium px-6 py-2 rounded-lg">

@@ -2,89 +2,98 @@
 
 import React from 'react';
 import ChatInterface from '@/components/ChatInterface';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { MessageSquare, Bot, Zap } from 'lucide-react';
+import { MessageSquare, Bot, Zap, ArrowRight } from 'lucide-react';
 
 export default function ChatPage() {
   return (
-    <div className="max-w-6xl mx-auto space-y-8">
-      {/* Page Header */}
-      <div className="text-center space-y-4">
-        <div className="flex items-center justify-center space-x-2">
-          <MessageSquare className="h-8 w-8 text-primary" />
-          <h1 className="text-3xl font-bold">AI Chat Interface</h1>
-        </div>
-        <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-          Start conversations with your AI agent powered by Sensay. Ask questions, get insights, and manage your business intelligently.
-        </p>
-        <div className="flex items-center justify-center space-x-4">
-          <Badge variant="secondary" className="px-3 py-1">
-            <Bot className="h-3 w-3 mr-1" />
-            Claude-3.7-Sonnet
-          </Badge>
-          <Badge variant="secondary" className="px-3 py-1">
-            <Zap className="h-3 w-3 mr-1" />
-            Real-time
-          </Badge>
-        </div>
-      </div>
+    <div className="min-h-screen bg-slate-900">
+      <div className="max-w-7xl mx-auto px-6 py-32">
+        {/* Page Header */}
+        <div className="text-center space-y-8 mb-12">
+          {/* Badge */}
+          <div className="inline-flex items-center rounded-full px-4 py-2 bg-blue-500/10 backdrop-blur border border-blue-500/20">
+            <Badge variant="secondary" className="bg-transparent border-0 text-blue-300 px-0">
+              <div className="w-2 h-2 bg-blue-500 rounded-full mr-2"></div>
+              AI Assistant
+            </Badge>
+            <span className="ml-2 text-sm text-gray-300">
+              Powered by 20+ Advanced AI Models
+            </span>
+            <ArrowRight className="ml-2 h-4 w-4 text-gray-400" />
+          </div>
 
-      {/* Chat Interface */}
-      <Card className="h-[75vh] border-2">
-        <CardHeader className="pb-4">
-          <CardTitle className="text-xl">Chat with AI Agent</CardTitle>
-          <CardDescription>
-            Your intelligent assistant is ready to help with product questions, inventory management, and more.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="h-full pb-6">
-          <div className="h-full">
+          {/* Main Heading */}
+          <h1 className="text-5xl font-bold tracking-tight text-white sm:text-6xl lg:text-7xl">
+            Chat with Your
+            <br />
+            <span className="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+              AI Shopping Assistant
+            </span>
+          </h1>
+
+          {/* Description */}
+          <p className="mx-auto max-w-3xl text-lg leading-8 text-gray-300">
+            Ask questions about products, get personalized recommendations, and manage your inventory.
+            Your intelligent assistant is powered by Sensay AI with real-time knowledge.
+          </p>
+
+          {/* AI Model Badges */}
+          <div className="flex items-center justify-center space-x-4 flex-wrap gap-2">
+            <Badge className="bg-slate-800/50 border border-slate-700 text-gray-300 px-4 py-2">
+              <Bot className="h-4 w-4 mr-2" />
+              Claude-3.7-Sonnet
+            </Badge>
+            <Badge className="bg-slate-800/50 border border-slate-700 text-gray-300 px-4 py-2">
+              <Zap className="h-4 w-4 mr-2" />
+              GPT-4o
+            </Badge>
+            <Badge className="bg-slate-800/50 border border-slate-700 text-gray-300 px-4 py-2">
+              <MessageSquare className="h-4 w-4 mr-2" />
+              Gemini-2.5-Flash
+            </Badge>
+          </div>
+        </div>
+
+        {/* Chat Interface */}
+        <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur border border-slate-700 rounded-3xl p-8">
+          <div className="h-[70vh]">
             <ChatInterface apiKey={process.env.NEXT_PUBLIC_SENSAY_API_KEY_SECRET} />
           </div>
-        </CardContent>
-      </Card>
+        </div>
 
-      {/* Quick Tips */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base">💬 Sample Questions</CardTitle>
-          </CardHeader>
-          <CardContent className="text-sm text-muted-foreground">
-            <ul className="space-y-1">
-              <li>• "Tell me about your capabilities"</li>
-              <li>• "How can you help me?"</li>
-              <li>• "What do you know about AI?"</li>
-            </ul>
-          </CardContent>
-        </Card>
+        {/* Quick Examples */}
+        <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="text-center">
+            <div className="bg-blue-500/10 backdrop-blur border border-blue-500/20 rounded-2xl p-6">
+              <MessageSquare className="w-12 h-12 text-blue-400 mx-auto mb-4" />
+              <h3 className="text-white font-semibold mb-2">Product Questions</h3>
+              <p className="text-gray-400 text-sm">
+                "Do you have waterproof jackets in size L?"
+              </p>
+            </div>
+          </div>
 
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base">⚡ Pro Tips</CardTitle>
-          </CardHeader>
-          <CardContent className="text-sm text-muted-foreground">
-            <ul className="space-y-1">
-              <li>• Be specific with your questions</li>
-              <li>• Ask follow-up questions for clarity</li>
-              <li>• Use natural language</li>
-            </ul>
-          </CardContent>
-        </Card>
+          <div className="text-center">
+            <div className="bg-purple-500/10 backdrop-blur border border-purple-500/20 rounded-2xl p-6">
+              <Bot className="w-12 h-12 text-purple-400 mx-auto mb-4" />
+              <h3 className="text-white font-semibold mb-2">Recommendations</h3>
+              <p className="text-gray-400 text-sm">
+                "What are your best-selling winter items?"
+              </p>
+            </div>
+          </div>
 
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base">🔒 Privacy</CardTitle>
-          </CardHeader>
-          <CardContent className="text-sm text-muted-foreground">
-            <ul className="space-y-1">
-              <li>• Your conversations are secure</li>
-              <li>• Data is encrypted in transit</li>
-              <li>• No data is stored permanently</li>
-            </ul>
-          </CardContent>
-        </Card>
+          <div className="text-center">
+            <div className="bg-green-500/10 backdrop-blur border border-green-500/20 rounded-2xl p-6">
+              <Zap className="w-12 h-12 text-green-400 mx-auto mb-4" />
+              <h3 className="text-white font-semibold mb-2">Inventory Help</h3>
+              <p className="text-gray-400 text-sm">
+                "Show me products with low inventory"
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { VerboseSensayAPI } from '@/api-debug';
 import { SAMPLE_USER_ID, SAMPLE_REPLICA_SLUG, API_VERSION } from '@/constants/auth';
+import { MessageSquare } from 'lucide-react';
 
 // Import types for the replica payload
 type LlmModel = 'gpt-4o' | 'claude-3-5-haiku-latest' | 'claude-3-7-sonnet-latest' | 'grok-2-latest' | 'grok-3-beta' | 'deepseek-chat' | 'o3-mini' | 'gpt-4o-mini' | 'huggingface-eva' | 'huggingface-dolphin-llama';
@@ -366,20 +367,20 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
   };
 
   return (
-    <div className="flex flex-col h-full max-w-4xl mx-auto">
+    <div className="flex flex-col h-full">
       {/* Config Panel */}
-      <div className="mb-4">
-        <button 
+      <div className="mb-6">
+        <button
           onClick={() => setShowConfig(!showConfig)}
-          className="text-xs underline text-gray-500 hover:text-gray-700"
+          className="text-xs underline text-gray-400 hover:text-gray-300 transition-colors"
         >
           {showConfig ? 'Hide API Configuration' : 'Show API Configuration'}
         </button>
-        
+
         {showConfig && (
-          <div className="p-4 bg-gray-100 rounded-lg mt-2">
+          <div className="p-4 bg-slate-800/50 border border-slate-700 rounded-xl mt-3">
             <div className="mb-4">
-              <label htmlFor="apiKey" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="apiKey" className="block text-sm font-medium text-gray-300 mb-2">
                 Sensay API Key
               </label>
               <input
@@ -387,12 +388,12 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
                 type="password"
                 value={localApiKey}
                 onChange={handleApiKeyChange}
-                className="input"
+                className="w-full p-3 bg-slate-700/50 border border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white placeholder-gray-400"
                 placeholder="Your Sensay API Key"
               />
             </div>
-            <p className="text-xs text-gray-500 mt-2">
-              This value will be stored in your browser. 
+            <p className="text-xs text-gray-400 mt-2">
+              This value will be stored in your browser.
               For development use, set it as the NEXT_PUBLIC_SENSAY_API_KEY_SECRET environment variable.
               <br />
               Note: A user and replica will be automatically created or reused when connecting.
@@ -402,27 +403,37 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
       </div>
       
       {/* Chat Messages */}
-      <div className="flex-1 overflow-y-auto mb-4 p-4 bg-white rounded-lg shadow">
+      <div className="flex-1 overflow-y-auto mb-6 p-6 bg-slate-800/30 border border-slate-700/50 rounded-2xl backdrop-blur">
         {messages.length === 0 ? (
-          <div className="flex items-center justify-center h-full text-gray-400">
-            <p>Start a conversation with the Sensay AI</p>
+          <div className="flex flex-col items-center justify-center h-full text-center">
+            <div className="w-16 h-16 bg-blue-500/20 rounded-full flex items-center justify-center mb-4">
+              <MessageSquare className="w-8 h-8 text-blue-400" />
+            </div>
+            <h3 className="text-white font-medium mb-2">Ready to help</h3>
+            <p className="text-gray-400 text-sm">
+              Start a conversation with your AI shopping assistant
+            </p>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-6">
             {messages.map((message, index) => (
               <div
                 key={index}
-                className={`p-3 rounded-lg ${
-                  message.role === 'user'
-                    ? 'bg-blue-100 ml-12'
-                    : 'bg-gray-100 mr-12'
-                }`}
+                className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
               >
-                <div className="text-xs text-gray-500 mb-1">
-                  {message.role === 'user' ? 'You' : 'Sensay AI'}
-                </div>
-                <div className="whitespace-pre-wrap">
-                  {formatMessage(message.content)}
+                <div
+                  className={`max-w-[80%] p-4 rounded-2xl ${
+                    message.role === 'user'
+                      ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white'
+                      : 'bg-slate-700/50 border border-slate-600 text-gray-200'
+                  }`}
+                >
+                  <div className="text-xs opacity-70 mb-2">
+                    {message.role === 'user' ? 'You' : 'AI Assistant'}
+                  </div>
+                  <div className="whitespace-pre-wrap leading-relaxed">
+                    {formatMessage(message.content)}
+                  </div>
                 </div>
               </div>
             ))}
@@ -434,23 +445,23 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
       {/* Input Form */}
       <form onSubmit={handleSubmit} className="relative">
         {error && (
-          <div className="bg-red-50 border border-red-200 rounded-md p-4 mb-4 shadow-sm">
+          <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4 mb-4 backdrop-blur">
             <div className="flex">
               <div className="flex-shrink-0">
-                <svg className="h-6 w-6 text-red-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                <svg className="h-6 w-6 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
                 </svg>
               </div>
               <div className="ml-3 flex-1">
-                <h3 className="text-md font-medium text-red-800">Error</h3>
-                <div className="mt-2 text-sm text-red-700">
+                <h3 className="text-md font-medium text-red-300">Error</h3>
+                <div className="mt-2 text-sm text-red-200">
                   {error}
                 </div>
-                
+
                 {/* Display helpful suggestions based on error message */}
                 {error.includes('API key') && (
-                  <div className="mt-3 bg-white p-3 rounded border border-red-100 text-xs text-gray-700">
-                    <p className="font-medium mb-1">Possible solutions:</p>
+                  <div className="mt-3 bg-slate-800/50 p-3 rounded-lg border border-slate-600 text-xs text-gray-300">
+                    <p className="font-medium mb-1 text-gray-200">Possible solutions:</p>
                     <ul className="list-disc pl-4 space-y-1">
                       <li>Check if your API key is entered correctly</li>
                       <li>Make sure there are no extra spaces before or after the key</li>
@@ -459,10 +470,10 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
                     </ul>
                   </div>
                 )}
-                
+
                 {error.includes('replica') && (
-                  <div className="mt-3 bg-white p-3 rounded border border-red-100 text-xs text-gray-700">
-                    <p className="font-medium mb-1">Possible solutions:</p>
+                  <div className="mt-3 bg-slate-800/50 p-3 rounded-lg border border-slate-600 text-xs text-gray-300">
+                    <p className="font-medium mb-1 text-gray-200">Possible solutions:</p>
                     <ul className="list-disc pl-4 space-y-1">
                       <li>Edit the SAMPLE_REPLICA_SLUG in src/constants/auth.ts to use a unique name</li>
                       <li>Check your Sensay dashboard for existing replicas</li>
@@ -473,34 +484,37 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
             </div>
           </div>
         )}
-        <textarea
-          value={inputValue}
-          onChange={handleInputChange}
-          onKeyDown={handleKeyDown}
-          placeholder="Type your message..."
-          className="w-full p-3 pr-20 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary min-h-[100px]"
-          disabled={isLoading}
-        />
-        <button
-          type="submit"
-          className="absolute right-2 bottom-2 bg-primary text-white px-4 py-2 rounded-md hover:bg-primary/90 transition-colors"
-          disabled={isLoading || !inputValue.trim()}
-        >
-          {isLoading ? 
-            <span className="flex items-center">
-              <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-              Sending...
-            </span>
-            : 'Send'
-          }
-        </button>
+        <div className="relative">
+          <textarea
+            value={inputValue}
+            onChange={handleInputChange}
+            onKeyDown={handleKeyDown}
+            placeholder="Ask me anything about your products, inventory, or customers..."
+            className="w-full p-4 pr-24 bg-slate-700/50 border border-slate-600 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent min-h-[120px] text-white placeholder-gray-400 resize-none"
+            disabled={isLoading}
+          />
+          <button
+            type="submit"
+            className="absolute right-3 bottom-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-3 rounded-xl transition-all duration-200 font-medium shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={isLoading || !inputValue.trim()}
+          >
+            {isLoading ? (
+              <span className="flex items-center">
+                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Sending...
+              </span>
+            ) : (
+              'Send'
+            )}
+          </button>
+        </div>
       </form>
-      
-      <p className="text-xs text-gray-400 mt-2 text-center">
-        Powered by Sensay Wisdom AI API
+
+      <p className="text-xs text-gray-400 mt-4 text-center">
+        Powered by Sensay AI • Press Enter to send, Shift+Enter for new line
       </p>
     </div>
   );

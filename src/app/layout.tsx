@@ -2,7 +2,8 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import '@/styles/globals.css';
 import { ThemeProvider } from '@/components/theme-provider';
-import { FloatingHeader } from '@/components/floating-header';
+import { SuperMemoryNavbar } from '@/components/supermemory-navbar';
+import { SuperMemoryFooter } from '@/components/supermemory-footer';
 import { Toaster } from '@/components/ui/toaster';
 
 const inter = Inter({ subsets: ['latin'] });
@@ -22,17 +23,16 @@ export default function RootLayout({
       <body className={inter.className}>
         <ThemeProvider
           attribute="class"
-          defaultTheme="light"
+          defaultTheme="dark"
           enableSystem
           disableTransitionOnChange
         >
-          <div className="min-h-screen bg-gradient-to-br from-background to-muted/20">
-            <FloatingHeader />
-            <main className="pt-24 pb-8 px-4">
-              <div className="max-w-7xl mx-auto">
-                {children}
-              </div>
+          <div className="min-h-screen bg-slate-900">
+            <SuperMemoryNavbar />
+            <main className="pt-0">
+              {children}
             </main>
+            <SuperMemoryFooter />
           </div>
           <Toaster />
         </ThemeProvider>

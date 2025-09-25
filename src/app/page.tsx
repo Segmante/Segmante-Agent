@@ -1,13 +1,11 @@
-import { HeroSection } from '@/components/hero-section';
-import { FeaturesSection } from '@/components/features-section';
-import { QuickStartSection } from '@/components/quick-start-section';
+import { SuperMemoryHero } from '@/components/supermemory-hero';
+import { UsageTimeline } from '@/components/usage-timeline';
 
 export default function Home() {
   return (
     <div className="space-y-0">
-      <HeroSection />
-      <FeaturesSection />
-      <QuickStartSection />
+      <SuperMemoryHero />
+      <UsageTimeline />
     </div>
   );
 }

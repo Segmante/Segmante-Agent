@@ -164,17 +164,17 @@ export function ShopifyConnectionForm({ onConnectionSuccess }: ShopifyConnection
   }
 
   return (
-    <Card className="w-full max-w-2xl">
-      <CardHeader>
-        <div className="flex items-center space-x-2">
-          <Store className="h-6 w-6 text-primary" />
-          <CardTitle>Connect Shopify Store</CardTitle>
+    <div className="w-full bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur border border-slate-700 rounded-3xl p-8">
+      <div className="text-center mb-8">
+        <div className="flex items-center justify-center w-16 h-16 mx-auto bg-blue-500/20 rounded-full mb-4">
+          <Store className="h-8 w-8 text-blue-400" />
         </div>
-        <CardDescription>
+        <h2 className="text-2xl font-bold text-white mb-2">Connect Shopify Store</h2>
+        <p className="text-gray-400">
           Enter your Shopify store domain and Admin API access token to connect your store.
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-6">
+        </p>
+      </div>
+      <div className="space-y-6">
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleConnection)} className="space-y-4">
@@ -184,18 +184,19 @@ export function ShopifyConnectionForm({ onConnectionSuccess }: ShopifyConnection
               name="domain"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Store Domain</FormLabel>
+                  <FormLabel className="text-gray-300 font-medium">Store Domain</FormLabel>
                   <FormControl>
                     <Input
                       placeholder="your-store.myshopify.com"
                       {...field}
                       disabled={isConnecting}
+                      className="bg-slate-700/50 border-slate-600 text-white placeholder-gray-400 focus:ring-blue-500 focus:border-blue-500 rounded-xl p-4"
                     />
                   </FormControl>
-                  <FormDescription>
+                  <FormDescription className="text-gray-400 text-sm">
                     Enter your Shopify store domain (with or without .myshopify.com)
                   </FormDescription>
-                  <FormMessage />
+                  <FormMessage className="text-red-400" />
                 </FormItem>
               )}
             />
@@ -205,7 +206,7 @@ export function ShopifyConnectionForm({ onConnectionSuccess }: ShopifyConnection
               name="accessToken"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Admin API Access Token</FormLabel>
+                  <FormLabel className="text-gray-300 font-medium">Admin API Access Token</FormLabel>
                   <FormControl>
                     <Input
                       type="password"
@@ -213,30 +214,31 @@ export function ShopifyConnectionForm({ onConnectionSuccess }: ShopifyConnection
                       autoComplete="current-password"
                       {...field}
                       disabled={isConnecting}
+                      className="bg-slate-700/50 border-slate-600 text-white placeholder-gray-400 focus:ring-blue-500 focus:border-blue-500 rounded-xl p-4"
                     />
                   </FormControl>
-                  <FormDescription>
+                  <FormDescription className="text-gray-400 text-sm">
                     Private app access token from your Shopify admin
                   </FormDescription>
-                  <FormMessage />
+                  <FormMessage className="text-red-400" />
                 </FormItem>
               )}
             />
 
             <Button
               type="submit"
-              className="w-full"
+              className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium px-8 py-4 rounded-xl transition-all duration-200 shadow-lg disabled:opacity-50"
               disabled={isConnecting}
               size="lg"
             >
               {isConnecting ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                   Connecting...
                 </>
               ) : (
                 <>
-                  <Store className="mr-2 h-4 w-4" />
+                  <Store className="mr-2 h-5 w-5" />
                   Connect Store
                 </>
               )}
@@ -246,85 +248,97 @@ export function ShopifyConnectionForm({ onConnectionSuccess }: ShopifyConnection
 
         {/* Connection Status */}
         {connectionStatus && (
-          <Alert className={connectionStatus.connected ? "border-green-200 bg-green-50 dark:bg-green-950" : "border-red-200 bg-red-50 dark:bg-red-950"}>
-            {connectionStatus.connected ? (
-              <CheckCircle className="h-4 w-4 text-green-600" />
-            ) : (
-              <AlertCircle className="h-4 w-4 text-red-600" />
-            )}
-            <AlertDescription className={connectionStatus.connected ? "text-green-800 dark:text-green-100" : "text-red-800 dark:text-red-100"}>
+          <div className={connectionStatus.connected
+            ? "bg-green-500/10 border border-green-500/30 rounded-xl p-4"
+            : "bg-red-500/10 border border-red-500/30 rounded-xl p-4"
+          }>
+            <div className="flex items-start space-x-3">
               {connectionStatus.connected ? (
-                <div className="space-y-2">
-                  <div className="font-medium">✅ Successfully connected to your Shopify store!</div>
-                  {connectionStatus.domain && (
-                    <div className="text-sm">Store: {connectionStatus.domain}</div>
-                  )}
-                  {productCount !== null && (
-                    <div className="text-sm">Found {productCount} products</div>
-                  )}
-                </div>
+                <CheckCircle className="h-5 w-5 text-green-400 mt-0.5" />
               ) : (
-                <div>
-                  <div className="font-medium">❌ Connection failed</div>
-                  <div className="text-sm mt-1">{connectionStatus.error}</div>
-                </div>
+                <AlertCircle className="h-5 w-5 text-red-400 mt-0.5" />
               )}
-            </AlertDescription>
-          </Alert>
+              <div className={connectionStatus.connected ? "text-green-200" : "text-red-200"}>
+                {connectionStatus.connected ? (
+                  <div className="space-y-2">
+                    <div className="font-medium">✅ Successfully connected to your Shopify store!</div>
+                    {connectionStatus.domain && (
+                      <div className="text-sm opacity-90">Store: {connectionStatus.domain}</div>
+                    )}
+                    {productCount !== null && (
+                      <div className="text-sm opacity-90">Found {productCount} products</div>
+                    )}
+                  </div>
+                ) : (
+                  <div>
+                    <div className="font-medium">❌ Connection failed</div>
+                    <div className="text-sm mt-1 opacity-90">{connectionStatus.error}</div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
         )}
 
         {/* Sync Progress */}
         {syncProgress && (
-          <div className="space-y-3">
+          <div className="space-y-4 bg-slate-800/30 border border-slate-700 rounded-xl p-4">
             <div className="flex items-center justify-between">
-              <span className="text-sm font-medium">
+              <span className="text-sm font-medium text-gray-300">
                 {syncProgress.stage === 'error' ? 'Error' : 'Syncing Products'}
               </span>
-              <Badge variant={syncProgress.stage === 'error' ? 'destructive' : 'secondary'}>
+              <Badge className={syncProgress.stage === 'error'
+                ? "bg-red-500/20 border-red-500/30 text-red-400"
+                : "bg-blue-500/20 border-blue-500/30 text-blue-400"
+              }>
                 {syncProgress.stage === 'completed' ? '100%' : `${syncProgress.progress}%`}
               </Badge>
             </div>
             <Progress
               value={syncProgress.progress}
-              className={`w-full ${syncProgress.stage === 'error' ? 'progress-error' : ''}`}
+              className="w-full"
             />
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-gray-400">
               {syncProgress.message}
             </p>
 
             {syncProgress.stage === 'completed' && (
-              <Alert className="border-green-200 bg-green-50 dark:bg-green-950">
-                <CheckCircle className="h-4 w-4 text-green-600" />
-                <AlertDescription className="text-green-800 dark:text-green-100">
-                  🎉 Your products have been successfully synced to your AI agent's knowledge base!
-                  You can now start chatting with your AI about your products.
-                </AlertDescription>
-              </Alert>
+              <div className="bg-green-500/10 border border-green-500/30 rounded-xl p-4 mt-4">
+                <div className="flex items-start space-x-3">
+                  <CheckCircle className="h-5 w-5 text-green-400 mt-0.5" />
+                  <div className="text-green-200">
+                    <div className="font-medium">🎉 Products synced successfully!</div>
+                    <div className="text-sm mt-1 opacity-90">
+                      Your products have been added to your AI agent's knowledge base. You can now start chatting!
+                    </div>
+                  </div>
+                </div>
+              </div>
             )}
           </div>
         )}
 
         {/* Help Information */}
-        <div className="border-t pt-6">
-          <h4 className="text-sm font-medium mb-2">Need help getting your API credentials?</h4>
-          <div className="space-y-2 text-sm text-muted-foreground">
-            <div className="flex items-center space-x-2">
-              <span>1.</span>
+        <div className="border-t border-slate-700 pt-6">
+          <h4 className="text-sm font-medium mb-4 text-gray-300">Need help getting your API credentials?</h4>
+          <div className="space-y-3 text-sm text-gray-400">
+            <div className="flex items-center space-x-3">
+              <span className="bg-slate-700 rounded-full w-6 h-6 flex items-center justify-center text-xs font-medium">1</span>
               <span>Go to your Shopify admin → Apps → Manage private apps</span>
               <ExternalLink className="h-3 w-3" />
             </div>
-            <div className="flex items-center space-x-2">
-              <span>2.</span>
+            <div className="flex items-center space-x-3">
+              <span className="bg-slate-700 rounded-full w-6 h-6 flex items-center justify-center text-xs font-medium">2</span>
               <span>Create a new private app with Admin API permissions</span>
             </div>
-            <div className="flex items-center space-x-2">
-              <span>3.</span>
+            <div className="flex items-center space-x-3">
+              <span className="bg-slate-700 rounded-full w-6 h-6 flex items-center justify-center text-xs font-medium">3</span>
               <span>Copy the Admin API access token and paste it above</span>
             </div>
           </div>
         </div>
 
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   )
 }

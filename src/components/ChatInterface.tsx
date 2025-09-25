@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { VerboseSensayAPI } from '@/api-debug';
 import { SAMPLE_USER_ID, SAMPLE_REPLICA_SLUG, API_VERSION } from '@/constants/auth';
 import { MessageSquare } from 'lucide-react';
+import { UserSessionManager } from '@/lib/user-session';
 
 // Import types for the replica payload
 type LlmModel = 'gpt-4o' | 'claude-3-5-haiku-latest' | 'claude-3-7-sonnet-latest' | 'grok-2-latest' | 'grok-3-beta' | 'deepseek-chat' | 'o3-mini' | 'gpt-4o-mini' | 'huggingface-eva' | 'huggingface-dolphin-llama';
@@ -60,10 +61,23 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
   // Initialize user and replica for the session
   const initializeSession = async (client: VerboseSensayAPI): Promise<string> => {
     console.log('--- INITIALIZING SESSION ---');
+
+    // First check if we have a user session from Shopify sync
+    const userSession = UserSessionManager.getUserSession();
+    if (userSession) {
+      console.log(`Using user session replica: ${userSession.replicaUuid} for user: ${userSession.userId}`);
+      setReplicaUuid(userSession.replicaUuid);
+      return userSession.replicaUuid;
+    }
+
+    // Fallback to existing replicaUuid if available
     if (replicaUuid) {
       console.log(`Reusing existing replica UUID: ${replicaUuid}`);
       return replicaUuid;
     }
+
+    console.log('⚠️ No user session found. Using fallback sample user approach.');
+    console.log('Please connect your Shopify store first for personalized AI assistance.');
 
     try {
       // Step 1: Check if the sample user exists (authenticate without X-USER-ID)
@@ -74,9 +88,9 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
         }
       });
       console.log('Created org-only client without user authentication');
-      
+
       let userExists = false;
-      
+
       try {
         // Try to get the user
         console.log(`Attempting to get user with ID: ${SAMPLE_USER_ID}`);
@@ -87,7 +101,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
         console.log(`❌ User ${SAMPLE_USER_ID} does not exist, will create it`);
         console.log('Get user error details:', error);
       }
-      
+
       // Step 2: Create the user if it doesn't exist
       if (!userExists) {
         console.log('Step 2: Creating new user...');
@@ -250,12 +264,16 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
     setInputValue('');
     
     try {
+      // Get user ID from session or fallback to sample
+      const userSession = UserSessionManager.getUserSession();
+      const userId = userSession?.userId || SAMPLE_USER_ID;
+
       // Initialize API client with the API key
       const client = new VerboseSensayAPI({
         // Use custom headers instead of TOKEN
         HEADERS: {
           'X-ORGANIZATION-SECRET': localApiKey,
-          'X-USER-ID': SAMPLE_USER_ID
+          'X-USER-ID': userId
         }
       });
       

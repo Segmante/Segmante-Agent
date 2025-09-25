@@ -40,6 +40,7 @@ export class ShopifyClient {
       return {
         connected: true,
         domain: shop.domain,
+        shopName: shop.name || shop.domain,
         lastSync: new Date().toISOString()
       };
     } catch (error: any) {

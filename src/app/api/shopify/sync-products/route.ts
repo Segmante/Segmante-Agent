@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { ShopifyClient } from '@/lib/shopify/client';
-import { ProductSyncService } from '@/lib/sensay/product-sync';
-import { ReplicaManager } from '@/lib/sensay/replica-manager';
+import { EnhancedProductSyncService } from '@/lib/sensay/enhanced-product-sync';
 
 export async function POST(request: NextRequest) {
   try {
@@ -50,27 +49,26 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Initialize proper replica session
-    const replicaManager = new ReplicaManager(sensayApiKey);
-    const session = await replicaManager.initializeSession();
+    // Get store name from connection status
+    const storeName = connectionStatus.shopName;
 
-    console.log('Initialized replica session:', session);
+    // Use enhanced sync service with per-user isolation
+    const syncService = new EnhancedProductSyncService(sensayApiKey);
 
-    // Sync to Sensay knowledge base
-    const syncService = new ProductSyncService(
-      sensayApiKey,
-      session.replicaUuid,
-      session.userId
+    const syncResult = await syncService.syncProductsToKnowledgeBase(
+      processedProducts,
+      domain,
+      accessToken,
+      storeName
     );
-
-    const syncResult = await syncService.syncProductsToKnowledgeBase(processedProducts);
 
     return NextResponse.json({
       success: syncResult.success,
       productCount: processedProducts.length,
       knowledgeBaseId: syncResult.knowledgeBaseId,
-      replicaUuid: session.replicaUuid,
-      userId: session.userId,
+      replicaUuid: syncResult.replicaUuid,
+      userId: syncResult.userId,
+      status: syncResult.status,
       error: syncResult.error
     });
 

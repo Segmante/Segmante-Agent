@@ -14,6 +14,7 @@ import { Badge } from "@/components/ui/badge"
 import { Store, CheckCircle, AlertCircle, Loader2, ExternalLink } from "lucide-react"
 import { SyncProgress } from "@/lib/sensay/product-sync"
 import { ShopifyConnectionStatus } from "@/lib/shopify/types"
+import { UserSessionManager } from "@/lib/user-session"
 
 const formSchema = z.object({
   domain: z.string().min(1, "Store domain is required").regex(
@@ -145,6 +146,18 @@ export function ShopifyConnectionForm({ onConnectionSuccess }: ShopifyConnection
         progress: 100
       })
 
+      // Save user session for chat functionality
+      if (syncResult.userId && syncResult.replicaUuid) {
+        UserSessionManager.saveUserSession({
+          userId: syncResult.userId,
+          replicaUuid: syncResult.replicaUuid,
+          shopifyDomain: formattedDomain,
+          storeName: connectionResult.shopName,
+          createdAt: new Date().toISOString()
+        });
+        console.log('User session saved for chat functionality');
+      }
+
       onConnectionSuccess?.(connectionResult)
 
     } catch (error: any) {
@@ -188,6 +201,7 @@ export function ShopifyConnectionForm({ onConnectionSuccess }: ShopifyConnection
                   <FormControl>
                     <Input
                       placeholder="your-store.myshopify.com"
+                      autoComplete="url"
                       {...field}
                       disabled={isConnecting}
                       className="bg-slate-700/50 border-slate-600 text-white placeholder-gray-400 focus:ring-blue-500 focus:border-blue-500 rounded-xl p-4"

@@ -93,6 +93,7 @@ export interface ShopifyConfig {
 export interface ShopifyConnectionStatus {
   connected: boolean;
   domain?: string;
+  shopName?: string;
   lastSync?: string;
   productCount?: number;
   error?: string;

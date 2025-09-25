@@ -1,11 +1,22 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import ChatInterface from '@/components/ChatInterface';
+import { ReplicaList } from '@/components/replica-list';
 import { Badge } from '@/components/ui/badge';
-import { MessageSquare, Bot, Zap, ArrowRight } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { MessageSquare, Bot, Zap, ArrowRight, Users, Settings } from 'lucide-react';
+import { ReplicaInfo } from '@/lib/services/replica-service';
 
 export default function ChatPage() {
+  const [showReplicaSelection, setShowReplicaSelection] = useState(false);
+  const [selectedReplica, setSelectedReplica] = useState<ReplicaInfo | null>(null);
+
+  const handleSelectReplica = (replica: ReplicaInfo) => {
+    setSelectedReplica(replica);
+    setShowReplicaSelection(false);
+  };
+
   return (
     <div className="min-h-screen bg-slate-900">
       <div className="max-w-7xl mx-auto px-6 py-32">
@@ -52,8 +63,53 @@ export default function ChatPage() {
               <MessageSquare className="h-4 w-4 mr-2" />
               Gemini-2.5-Flash
             </Badge>
+            <Button
+              onClick={() => setShowReplicaSelection(!showReplicaSelection)}
+              className="bg-slate-800/50 border border-slate-700 text-gray-300 hover:bg-slate-700 hover:text-white"
+            >
+              <Users className="h-4 w-4 mr-2" />
+              {selectedReplica ? selectedReplica.name : 'Select AI Replica'}
+            </Button>
           </div>
         </div>
+
+        {/* Replica Selection */}
+        {showReplicaSelection && (
+          <div className="mb-12">
+            <ReplicaList
+              apiKey={process.env.NEXT_PUBLIC_SENSAY_API_KEY_SECRET!}
+              onSelectReplica={handleSelectReplica}
+              showSelection={true}
+            />
+          </div>
+        )}
+
+        {/* Current Replica Info */}
+        {selectedReplica && !showReplicaSelection && (
+          <div className="mb-8">
+            <div className="bg-gradient-to-br from-blue-500/10 to-purple-500/10 backdrop-blur border border-blue-500/30 rounded-2xl p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
+                    <Bot className="h-4 w-4 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-white font-medium">{selectedReplica.name}</h3>
+                    <p className="text-gray-400 text-sm">{selectedReplica.shortDescription}</p>
+                  </div>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowReplicaSelection(true)}
+                  className="text-gray-400 hover:text-white"
+                >
+                  <Settings className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Chat Interface */}
         <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur border border-slate-700 rounded-3xl p-8">

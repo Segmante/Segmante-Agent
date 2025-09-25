@@ -3,13 +3,17 @@
 import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Store, Zap, AlertCircle, CheckCircle, ArrowRight } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Store, Zap, AlertCircle, CheckCircle, ArrowRight, Database, Bot } from 'lucide-react';
 import { ShopifyConnectionForm } from '@/components/shopify/connection-form';
+import { KnowledgeBaseList } from '@/components/knowledge-base-list';
+import { ReplicaList } from '@/components/replica-list';
 import { ShopifyConnectionStatus } from '@/lib/shopify/types';
 
 export default function StoresPage() {
   const [connectionStatus, setConnectionStatus] = useState<ShopifyConnectionStatus | null>(null);
   const [showConnectionForm, setShowConnectionForm] = useState(true);
+  const [activeTab, setActiveTab] = useState<'connection' | 'replicas' | 'knowledge'>('connection');
 
   const handleConnectionSuccess = (status: ShopifyConnectionStatus) => {
     setConnectionStatus(status);
@@ -102,58 +106,123 @@ export default function StoresPage() {
           </div>
         </div>
 
-        {/* Connection Form or Connected Store Info */}
-        {showConnectionForm ? (
-          <div className="flex justify-center mb-16">
-            <div className="w-full max-w-2xl">
-              <ShopifyConnectionForm onConnectionSuccess={handleConnectionSuccess} />
-            </div>
-          </div>
-        ) : (
-          connectionStatus && (
-            <div className="bg-gradient-to-br from-green-500/10 to-emerald-500/10 backdrop-blur border border-green-500/30 rounded-3xl p-12 text-center mb-16">
-              <div className="flex items-center justify-center w-20 h-20 mx-auto bg-green-500/20 rounded-full mb-6">
-                <CheckCircle className="h-10 w-10 text-green-400" />
+        {/* Navigation Tabs */}
+        <div className="flex items-center justify-center space-x-4 mb-16">
+          <Button
+            onClick={() => setActiveTab('connection')}
+            variant={activeTab === 'connection' ? 'default' : 'outline'}
+            className={`${
+              activeTab === 'connection'
+                ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                : 'border-slate-600 text-gray-300 hover:bg-slate-700 hover:text-white'
+            }`}
+          >
+            <Store className="h-4 w-4 mr-2" />
+            Store Connection
+          </Button>
+          <Button
+            onClick={() => setActiveTab('replicas')}
+            variant={activeTab === 'replicas' ? 'default' : 'outline'}
+            className={`${
+              activeTab === 'replicas'
+                ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                : 'border-slate-600 text-gray-300 hover:bg-slate-700 hover:text-white'
+            }`}
+          >
+            <Bot className="h-4 w-4 mr-2" />
+            AI Replicas
+          </Button>
+          <Button
+            onClick={() => setActiveTab('knowledge')}
+            variant={activeTab === 'knowledge' ? 'default' : 'outline'}
+            className={`${
+              activeTab === 'knowledge'
+                ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                : 'border-slate-600 text-gray-300 hover:bg-slate-700 hover:text-white'
+            }`}
+          >
+            <Database className="h-4 w-4 mr-2" />
+            Knowledge Bases
+          </Button>
+        </div>
+
+        {/* Tab Content */}
+        {activeTab === 'connection' && (
+          <>
+            {/* Connection Form or Connected Store Info */}
+            {showConnectionForm ? (
+              <div className="flex justify-center mb-16">
+                <div className="w-full max-w-2xl">
+                  <ShopifyConnectionForm onConnectionSuccess={handleConnectionSuccess} />
+                </div>
               </div>
-              <h3 className="text-2xl font-bold text-white mb-4">
-                Store Connected Successfully!
-              </h3>
-              <p className="text-gray-300 text-lg max-w-md mx-auto mb-6">
-                {connectionStatus.domain && `Connected to ${connectionStatus.domain}`}
-              </p>
-              <p className="text-gray-400">
-                Your products are now available to your AI agent. Start chatting to test the integration!
-              </p>
+            ) : (
+              connectionStatus && (
+                <div className="bg-gradient-to-br from-green-500/10 to-emerald-500/10 backdrop-blur border border-green-500/30 rounded-3xl p-12 text-center mb-16">
+                  <div className="flex items-center justify-center w-20 h-20 mx-auto bg-green-500/20 rounded-full mb-6">
+                    <CheckCircle className="h-10 w-10 text-green-400" />
+                  </div>
+                  <h3 className="text-2xl font-bold text-white mb-4">
+                    Store Connected Successfully!
+                  </h3>
+                  <p className="text-gray-300 text-lg max-w-md mx-auto mb-6">
+                    {connectionStatus.domain && `Connected to ${connectionStatus.domain}`}
+                  </p>
+                  <p className="text-gray-400">
+                    Your products are now available to your AI agent. Start chatting to test the integration!
+                  </p>
+                </div>
+              )
+            )}
+
+            {/* Feature Preview */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div className="bg-gradient-to-br from-slate-800/30 to-slate-900/30 backdrop-blur border border-slate-700 rounded-2xl p-8 text-center">
+                <div className="text-4xl mb-4">🔄</div>
+                <h3 className="text-xl font-semibold text-white mb-4">Auto Sync</h3>
+                <p className="text-gray-400 leading-relaxed">
+                  Automatically sync product data, inventory levels, and pricing updates in real-time.
+                </p>
+              </div>
+
+              <div className="bg-gradient-to-br from-slate-800/30 to-slate-900/30 backdrop-blur border border-slate-700 rounded-2xl p-8 text-center">
+                <div className="text-4xl mb-4">🧠</div>
+                <h3 className="text-xl font-semibold text-white mb-4">AI Training</h3>
+                <p className="text-gray-400 leading-relaxed">
+                  Your product data is intelligently processed and added to your AI agent's knowledge base.
+                </p>
+              </div>
+
+              <div className="bg-gradient-to-br from-slate-800/30 to-slate-900/30 backdrop-blur border border-slate-700 rounded-2xl p-8 text-center">
+                <div className="text-4xl mb-4">📊</div>
+                <h3 className="text-xl font-semibold text-white mb-4">Analytics</h3>
+                <p className="text-gray-400 leading-relaxed">
+                  Monitor sync status, track API usage, and optimize your store's AI performance.
+                </p>
+              </div>
             </div>
-          )
+          </>
         )}
 
-        {/* Feature Preview */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div className="bg-gradient-to-br from-slate-800/30 to-slate-900/30 backdrop-blur border border-slate-700 rounded-2xl p-8 text-center">
-            <div className="text-4xl mb-4">🔄</div>
-            <h3 className="text-xl font-semibold text-white mb-4">Auto Sync</h3>
-            <p className="text-gray-400 leading-relaxed">
-              Automatically sync product data, inventory levels, and pricing updates in real-time.
-            </p>
+        {/* Replicas Tab */}
+        {activeTab === 'replicas' && (
+          <div>
+            <ReplicaList
+              apiKey={process.env.NEXT_PUBLIC_SENSAY_API_KEY_SECRET!}
+              showSelection={false}
+            />
           </div>
+        )}
 
-          <div className="bg-gradient-to-br from-slate-800/30 to-slate-900/30 backdrop-blur border border-slate-700 rounded-2xl p-8 text-center">
-            <div className="text-4xl mb-4">🧠</div>
-            <h3 className="text-xl font-semibold text-white mb-4">AI Training</h3>
-            <p className="text-gray-400 leading-relaxed">
-              Your product data is intelligently processed and added to your AI agent's knowledge base.
-            </p>
+        {/* Knowledge Bases Tab */}
+        {activeTab === 'knowledge' && (
+          <div>
+            <KnowledgeBaseList
+              apiKey={process.env.NEXT_PUBLIC_SENSAY_API_KEY_SECRET!}
+              showActions={true}
+            />
           </div>
-
-          <div className="bg-gradient-to-br from-slate-800/30 to-slate-900/30 backdrop-blur border border-slate-700 rounded-2xl p-8 text-center">
-            <div className="text-4xl mb-4">📊</div>
-            <h3 className="text-xl font-semibold text-white mb-4">Analytics</h3>
-            <p className="text-gray-400 leading-relaxed">
-              Monitor sync status, track API usage, and optimize your store's AI performance.
-            </p>
-          </div>
-        </div>
+        )}
       </div>
     </div>
   );

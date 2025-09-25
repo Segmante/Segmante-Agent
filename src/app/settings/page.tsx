@@ -13,11 +13,8 @@ export default function SettingsPage() {
           <div className="inline-flex items-center rounded-full px-4 py-2 bg-blue-500/10 backdrop-blur border border-blue-500/20">
             <Badge variant="secondary" className="bg-transparent border-0 text-blue-300 px-0">
               <div className="w-2 h-2 bg-blue-500 rounded-full mr-2"></div>
-              Configuration
+              this Feature is in comming soon
             </Badge>
-            <span className="ml-2 text-sm text-gray-300">
-              Customize Your AI Experience
-            </span>
             <ArrowRight className="ml-2 h-4 w-4 text-gray-400" />
           </div>
 

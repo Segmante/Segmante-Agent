@@ -16,18 +16,6 @@ export function SuperMemoryHero() {
       {/* Content */}
       <div className="relative z-10 px-6 py-32 sm:py-40 lg:py-48">
         <div className="mx-auto max-w-6xl text-center">
-          {/* Update Badge */}
-          <div className="mb-8 inline-flex items-center rounded-full px-4 py-2 bg-blue-500/10 backdrop-blur border border-blue-500/20">
-            <Badge variant="secondary" className="bg-transparent border-0 text-blue-300 px-0">
-              <div className="w-2 h-2 bg-blue-500 rounded-full mr-2"></div>
-              New
-            </Badge>
-            <span className="ml-2 text-sm text-gray-300">
-              AI-Powered Shopify Assistant with 20+ AI Models
-            </span>
-            <ArrowRight className="ml-2 h-4 w-4 text-gray-400" />
-          </div>
-
           {/* Main heading with Cover effect */}
           <h1 className="text-5xl font-bold tracking-tight text-white sm:text-7xl lg:text-8xl mb-8">
             Next-Gen <Cover>AI Agent</Cover> for Shopify.

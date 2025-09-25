@@ -86,18 +86,6 @@ export default function ChatPage() {
       <div className="max-w-7xl mx-auto px-6 py-32">
         {/* Page Header */}
         <div className="text-center space-y-8 mb-12">
-          {/* Badge */}
-          <div className="inline-flex items-center rounded-full px-4 py-2 bg-blue-500/10 backdrop-blur border border-blue-500/20">
-            <Badge variant="secondary" className="bg-transparent border-0 text-blue-300 px-0">
-              <div className="w-2 h-2 bg-blue-500 rounded-full mr-2"></div>
-              AI Assistant
-            </Badge>
-            <span className="ml-2 text-sm text-gray-300">
-              Powered by 20+ Advanced AI Models
-            </span>
-            <ArrowRight className="ml-2 h-4 w-4 text-gray-400" />
-          </div>
-
           {/* Main Heading */}
           <h1 className="text-5xl font-bold tracking-tight text-white sm:text-6xl lg:text-7xl">
             Chat with Your

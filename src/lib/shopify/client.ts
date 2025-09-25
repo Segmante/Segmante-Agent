@@ -242,4 +242,43 @@ Updated: ${new Date(product.updatedAt).toLocaleDateString()}
       return 0;
     }
   }
+
+  /**
+   * Make a PUT request (for actions service)
+   */
+  async put(endpoint: string, data: any): Promise<any> {
+    try {
+      const response = await this.client.put(endpoint, data);
+      return response.data;
+    } catch (error: any) {
+      console.error(`Error making PUT request to ${endpoint}:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Make a POST request (for actions service)
+   */
+  async post(endpoint: string, data: any): Promise<any> {
+    try {
+      const response = await this.client.post(endpoint, data);
+      return response.data;
+    } catch (error: any) {
+      console.error(`Error making POST request to ${endpoint}:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Make a DELETE request (for actions service)
+   */
+  async delete(endpoint: string): Promise<any> {
+    try {
+      const response = await this.client.delete(endpoint);
+      return response.data;
+    } catch (error: any) {
+      console.error(`Error making DELETE request to ${endpoint}:`, error);
+      throw error;
+    }
+  }
 }

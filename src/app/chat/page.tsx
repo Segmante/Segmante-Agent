@@ -1,16 +1,38 @@
 'use client';
 
-import React, { useState } from 'react';
-import ChatInterface from '@/components/ChatInterface';
+import React, { useState, useEffect } from 'react';
+import EnhancedChatInterface from '@/components/EnhancedChatInterface';
 import { ReplicaList } from '@/components/replica-list';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { MessageSquare, Bot, Zap, ArrowRight, Users, Settings } from 'lucide-react';
+import { MessageSquare, Bot, Zap, ArrowRight, Users, Settings, AlertTriangle } from 'lucide-react';
 import { ReplicaInfo } from '@/lib/services/replica-service';
+import { UserSessionManager } from '@/lib/user-session';
 
 export default function ChatPage() {
   const [showReplicaSelection, setShowReplicaSelection] = useState(false);
   const [selectedReplica, setSelectedReplica] = useState<ReplicaInfo | null>(null);
+  const [shopifyConfig, setShopifyConfig] = useState<{domain: string; accessToken: string} | null>(null);
+  const [isEnhancedMode, setIsEnhancedMode] = useState(false);
+
+  // Check for Shopify configuration on mount
+  useEffect(() => {
+    // Try to get Shopify config from environment variables
+    const domain = process.env.NEXT_PUBLIC_SHOPIFY_DOMAIN;
+    const accessToken = process.env.NEXT_PUBLIC_SHOPIFY_ACCESS_TOKEN;
+
+    if (domain && accessToken) {
+      const config = {
+        domain,
+        accessToken
+      };
+      setShopifyConfig(config);
+      setIsEnhancedMode(true);
+      console.log('🛍️ Shopify configuration loaded for enhanced mode');
+    } else {
+      console.log('ℹ️ No Shopify configuration found, using conversation-only mode');
+    }
+  }, []);
 
   const handleSelectReplica = (replica: ReplicaInfo) => {
     setSelectedReplica(replica);
@@ -48,6 +70,21 @@ export default function ChatPage() {
             Ask questions about products, get personalized recommendations, and manage your inventory.
             Your intelligent assistant is powered by Sensay AI with real-time knowledge.
           </p>
+
+          {/* Enhanced Mode Indicator */}
+          {isEnhancedMode ? (
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-500/10 to-blue-500/10 border border-green-500/20 rounded-full">
+              <Zap className="w-4 h-4 text-green-400" />
+              <span className="text-sm text-green-300 font-medium">Enhanced Mode Active</span>
+              <span className="text-xs text-gray-400">• Actions + Conversation</span>
+            </div>
+          ) : (
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-yellow-500/10 border border-yellow-500/20 rounded-full">
+              <AlertTriangle className="w-4 h-4 text-yellow-400" />
+              <span className="text-sm text-yellow-300 font-medium">Conversation Mode Only</span>
+              <span className="text-xs text-gray-400">• Connect Shopify for actions</span>
+            </div>
+          )}
 
           {/* AI Model Badges */}
           <div className="flex items-center justify-center space-x-4 flex-wrap gap-2">
@@ -114,7 +151,10 @@ export default function ChatPage() {
         {/* Chat Interface */}
         <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur border border-slate-700 rounded-3xl p-8">
           <div className="h-[70vh]">
-            <ChatInterface apiKey={process.env.NEXT_PUBLIC_SENSAY_API_KEY_SECRET} />
+            <EnhancedChatInterface
+              apiKey={process.env.NEXT_PUBLIC_SENSAY_API_KEY_SECRET}
+              shopifyConfig={shopifyConfig || undefined}
+            />
           </div>
         </div>
 
@@ -125,7 +165,7 @@ export default function ChatPage() {
               <MessageSquare className="w-12 h-12 text-blue-400 mx-auto mb-4" />
               <h3 className="text-white font-semibold mb-2">Product Questions</h3>
               <p className="text-gray-400 text-sm">
-                "Do you have waterproof jackets in size L?"
+                &quot;What&apos;s the current iPhone stock?&quot;
               </p>
             </div>
           </div>
@@ -133,9 +173,14 @@ export default function ChatPage() {
           <div className="text-center">
             <div className="bg-purple-500/10 backdrop-blur border border-purple-500/20 rounded-2xl p-6">
               <Bot className="w-12 h-12 text-purple-400 mx-auto mb-4" />
-              <h3 className="text-white font-semibold mb-2">Recommendations</h3>
+              <h3 className="text-white font-semibold mb-2">
+                {isEnhancedMode ? 'AI Actions' : 'Recommendations'}
+              </h3>
               <p className="text-gray-400 text-sm">
-                "What are your best-selling winter items?"
+                {isEnhancedMode
+                  ? '&quot;Update iPhone price to $1,500&quot;'
+                  : '&quot;What are your best-selling items?&quot;'
+                }
               </p>
             </div>
           </div>
@@ -143,13 +188,43 @@ export default function ChatPage() {
           <div className="text-center">
             <div className="bg-green-500/10 backdrop-blur border border-green-500/20 rounded-2xl p-6">
               <Zap className="w-12 h-12 text-green-400 mx-auto mb-4" />
-              <h3 className="text-white font-semibold mb-2">Inventory Help</h3>
+              <h3 className="text-white font-semibold mb-2">
+                {isEnhancedMode ? 'Stock Management' : 'Inventory Help'}
+              </h3>
               <p className="text-gray-400 text-sm">
-                "Show me products with low inventory"
+                {isEnhancedMode
+                  ? '&quot;Update Samsung Galaxy stock to 100&quot;'
+                  : '&quot;Show me products with low inventory&quot;'
+                }
               </p>
             </div>
           </div>
         </div>
+
+        {/* Action Mode Instructions */}
+        {isEnhancedMode && (
+          <div className="mt-12 bg-gradient-to-r from-green-500/5 to-blue-500/5 border border-green-500/20 rounded-2xl p-6">
+            <h3 className="text-white font-semibold mb-4 flex items-center gap-2">
+              <Zap className="w-5 h-5 text-green-400" />
+              Enhanced Action Mode - Command Examples:
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+              <div className="space-y-2">
+                <p className="text-green-300 font-medium">💰 Price Updates:</p>
+                <p className="text-gray-400">&quot;Update iPhone 14 price to $1,500&quot;</p>
+                <p className="text-gray-400">&quot;Increase all Apple products by 10%&quot;</p>
+              </div>
+              <div className="space-y-2">
+                <p className="text-blue-300 font-medium">📦 Stock Management:</p>
+                <p className="text-gray-400">&quot;Update Samsung Galaxy stock to 50&quot;</p>
+                <p className="text-gray-400">&quot;Update inventory for product ABC-123&quot;</p>
+              </div>
+            </div>
+            <div className="mt-4 text-xs text-gray-500">
+              ⚠️ All actions will show preview and request confirmation for security
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

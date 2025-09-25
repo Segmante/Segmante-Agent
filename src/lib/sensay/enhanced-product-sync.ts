@@ -259,7 +259,7 @@ export class EnhancedProductSyncService {
       // Note: This assumes knowledge bases have identifiable metadata or naming
       const recentKnowledgeBase = trainingData.items
         .filter(item => item.status === 'READY')
-        .sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime())
+        .sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime())
         [0];
 
       if (recentKnowledgeBase && recentKnowledgeBase.id) {
@@ -267,7 +267,7 @@ export class EnhancedProductSyncService {
           userId,
           replicaUuid,
           knowledgeBaseId: recentKnowledgeBase.id,
-          lastSyncAt: new Date(recentKnowledgeBase.createdAt || Date.now()),
+          lastSyncAt: new Date(recentKnowledgeBase.created_at || Date.now()),
           productCount: 0 // Will be updated on next sync
         };
 

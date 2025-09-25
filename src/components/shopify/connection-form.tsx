@@ -323,7 +323,7 @@ export function ShopifyConnectionForm({ onConnectionSuccess }: ShopifyConnection
                   <div className="text-green-200">
                     <div className="font-medium">🎉 Products synced successfully!</div>
                     <div className="text-sm mt-1 opacity-90">
-                      Your products have been added to your AI agent's knowledge base. You can now start chatting!
+                      Your products have been added to your AI agent&apos;s knowledge base. You can now start chatting!
                     </div>
                   </div>
                 </div>

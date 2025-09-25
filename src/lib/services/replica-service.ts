@@ -118,7 +118,7 @@ export class ReplicaService {
           undefined,
         createdAt: item.created_at,
         updatedAt: item.updated_at,
-        productCount: this.extractProductCount(item.raw_text)
+        productCount: this.extractProductCount(item.raw_text || '')
       }));
     } catch (error) {
       console.error('Error fetching knowledge bases:', error);

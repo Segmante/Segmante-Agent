@@ -76,7 +76,7 @@ export default function SettingsPage() {
               </div>
               <div>
                 <h3 className="text-xl font-semibold text-white">AI Agent Settings</h3>
-                <p className="text-gray-400 text-sm">Customize your AI agent's behavior and personality</p>
+                <p className="text-gray-400 text-sm">Customize your AI agent&apos;s behavior and personality</p>
               </div>
             </div>
 

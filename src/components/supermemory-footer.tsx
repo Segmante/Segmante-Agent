@@ -21,9 +21,8 @@ export function SuperMemoryFooter() {
             <Image
               src="/segmante.webp"
               alt="Segmante"
-              width={100}
-              height={32}
-              className="h-6 w-auto opacity-80"
+              width={200}
+              height={50}
             />
           </div>
 

@@ -29,7 +29,7 @@ export class ReplicaManager {
       console.log('Step 1: Checking if sample user exists...');
       const orgOnlyClient = new VerboseSensayAPI({
         HEADERS: {
-          'X-ORGANIZATION-SECRET': process.env.NEXT_PUBLIC_SENSAY_API_KEY_SECRET
+          'X-ORGANIZATION-SECRET': process.env.NEXT_PUBLIC_SENSAY_API_KEY_SECRET || ''
         }
       });
 
@@ -65,7 +65,7 @@ export class ReplicaManager {
       console.log('Step 3: Creating user-authenticated client...');
       const userClient = new VerboseSensayAPI({
         HEADERS: {
-          'X-ORGANIZATION-SECRET': process.env.NEXT_PUBLIC_SENSAY_API_KEY_SECRET,
+          'X-ORGANIZATION-SECRET': process.env.NEXT_PUBLIC_SENSAY_API_KEY_SECRET || '',
           'X-USER-ID': SAMPLE_USER_ID
         }
       });

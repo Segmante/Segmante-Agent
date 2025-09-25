@@ -193,7 +193,7 @@ Always maintain a helpful, professional, and friendly tone while being informati
    */
   async deleteUserReplica(userId: string, replicaUuid: string): Promise<boolean> {
     try {
-      const deleteResponse = await this.sensayClient.replicas.deleteV1Replicas1(
+      const deleteResponse = await this.sensayClient.replicas.deleteV1Replicas(
         replicaUuid,
         API_VERSION
       );
@@ -220,17 +220,17 @@ Always maintain a helpful, professional, and friendly tone while being informati
         API_VERSION
       );
 
-      if (!replicaResponse.success || !replicaResponse.metadata) {
+      if (!replicaResponse) {
         return null;
       }
 
-      const metadata = replicaResponse.metadata;
+      const metadata = replicaResponse;
 
       return {
-        userId: metadata.userId,
+        userId: metadata.ownerID,
         replicaUuid,
-        shopifyDomain: metadata.shopifyDomain,
-        createdAt: new Date(metadata.createdAt)
+        shopifyDomain: '', // Not available in this response
+        createdAt: new Date(Date.now()) // Use current date as fallback
       };
     } catch (error) {
       console.error('Error getting user info:', error);

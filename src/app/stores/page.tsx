@@ -189,7 +189,7 @@ export default function StoresPage() {
                 <div className="text-4xl mb-4">🧠</div>
                 <h3 className="text-xl font-semibold text-white mb-4">AI Training</h3>
                 <p className="text-gray-400 leading-relaxed">
-                  Your product data is intelligently processed and added to your AI agent's knowledge base.
+                  Your product data is intelligently processed and added to your AI agent&apos;s knowledge base.
                 </p>
               </div>
 
@@ -197,7 +197,7 @@ export default function StoresPage() {
                 <div className="text-4xl mb-4">📊</div>
                 <h3 className="text-xl font-semibold text-white mb-4">Analytics</h3>
                 <p className="text-gray-400 leading-relaxed">
-                  Monitor sync status, track API usage, and optimize your store's AI performance.
+                  Monitor sync status, track API usage, and optimize your store&apos;s AI performance.
                 </p>
               </div>
             </div>

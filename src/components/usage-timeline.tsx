@@ -103,14 +103,14 @@ export function UsageTimeline() {
               <div className="flex-1">
                 <div className="bg-slate-700/50 rounded-lg p-3 mb-3">
                   <p className="text-gray-300 text-sm">
-                    "Do you have any waterproof jackets in size large?"
+                    &quot;Do you have any waterproof jackets in size large?&quot;
                   </p>
                 </div>
                 <div className="bg-blue-600/20 rounded-lg p-3">
                   <p className="text-blue-200 text-sm">
-                    "Yes! We have 3 waterproof jackets in large: the Alpine Pro (₹4,999),
+                    &quot;Yes! We have 3 waterproof jackets in large: the Alpine Pro (₹4,999),
                     Trail Master (₹6,499), and Summit Explorer (₹8,999). All feature
-                    10,000mm waterproofing and breathable fabric. Would you like more details about any of these?"
+                    10,000mm waterproofing and breathable fabric. Would you like more details about any of these?&quot;
                   </p>
                 </div>
               </div>

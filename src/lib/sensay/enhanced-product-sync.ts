@@ -2,6 +2,7 @@ import { VerboseSensayAPI } from '@/api-debug';
 import { ProcessedProductData } from '../shopify/types';
 import { API_VERSION } from '@/constants/auth';
 import { SensayUserManager } from './user-manager';
+import { DocumentationKnowledgeBaseService } from '@/lib/services/documentation-knowledge-base';
 
 export interface SyncStatus {
   success: boolean;
@@ -29,12 +30,14 @@ export interface UserKnowledgeBase {
 export class EnhancedProductSyncService {
   private sensayClient: VerboseSensayAPI;
   private userManager: SensayUserManager;
+  private documentationService: DocumentationKnowledgeBaseService;
   private apiKey: string;
   private knowledgeBaseStorage: Map<string, UserKnowledgeBase> = new Map();
 
   constructor(apiKey: string) {
     this.apiKey = apiKey;
     this.userManager = new SensayUserManager(apiKey);
+    this.documentationService = new DocumentationKnowledgeBaseService(apiKey);
     this.sensayClient = new VerboseSensayAPI({
       HEADERS: {
         'X-ORGANIZATION-SECRET': apiKey
@@ -196,12 +199,21 @@ export class EnhancedProductSyncService {
 
       const finalStatus = await this.improvedProcessingCheck(knowledgeBaseId, onProgress);
 
-      // Stage 6: Store knowledge base reference
+      // Stage 6: Create or update documentation knowledge base
+      onProgress?.({
+        stage: 'processing',
+        message: 'Setting up application documentation for AI...',
+        progress: 85
+      });
+
+      await this.ensureDocumentationKnowledgeBase(replicaUuid);
+
+      // Stage 7: Store knowledge base reference
       this.storeKnowledgeBaseReference(userId, replicaUuid, knowledgeBaseId, products.length);
 
       onProgress?.({
         stage: 'completed',
-        message: `Successfully ${isUpdate ? 'updated' : 'synced'} ${products.length} products`,
+        message: `Successfully ${isUpdate ? 'updated' : 'synced'} ${products.length} products with AI documentation`,
         progress: 100
       });
 
@@ -547,5 +559,31 @@ When customers inquire about products:
       storeName,
       onProgress
     );
+  }
+
+  /**
+   * Ensure documentation knowledge base exists for replica
+   */
+  private async ensureDocumentationKnowledgeBase(replicaUuid: string): Promise<void> {
+    try {
+      // Check if documentation knowledge base already exists
+      const hasDocumentation = await this.documentationService.hasDocumentationKnowledgeBase(replicaUuid);
+
+      if (!hasDocumentation) {
+        console.log(`Creating documentation knowledge base for replica ${replicaUuid}`);
+        const docKB = await this.documentationService.createDocumentationKnowledgeBase(replicaUuid);
+
+        if (docKB) {
+          console.log(`✅ Documentation knowledge base created with ID: ${docKB.id}`);
+        } else {
+          console.warn('⚠️ Could not create documentation knowledge base, but continuing...');
+        }
+      } else {
+        console.log(`✅ Documentation knowledge base already exists for replica ${replicaUuid}`);
+      }
+    } catch (error) {
+      console.error('Error ensuring documentation knowledge base:', error);
+      // Don't throw error - documentation KB is helpful but not critical
+    }
   }
 }

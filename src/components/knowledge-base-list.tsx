@@ -16,11 +16,16 @@ import {
   Eye,
   MoreHorizontal,
   Trash2,
-  RefreshCw
+  RefreshCw,
+  BookOpen,
+  Plus,
+  Zap,
+  Settings
 } from 'lucide-react';
-import { KnowledgeBaseInfo, ReplicaService } from '@/lib/services/replica-service';
+import { KnowledgeBaseInfo, ReplicaService, ReplicaInfo } from '@/lib/services/replica-service';
 import { KnowledgeBaseDetailsModal } from '@/components/knowledge-base-details-modal';
 import { KnowledgeBaseDeleteModal } from '@/components/knowledge-base-delete-modal';
+import { DocumentationKnowledgeBaseService } from '@/lib/services/documentation-knowledge-base';
 
 interface KnowledgeBaseListProps {
   apiKey: string;
@@ -34,8 +39,10 @@ interface EnrichedKnowledgeBase extends KnowledgeBaseInfo {
 
 export function KnowledgeBaseList({ apiKey, replicaUuid, showActions = false }: KnowledgeBaseListProps) {
   const [knowledgeBases, setKnowledgeBases] = useState<EnrichedKnowledgeBase[]>([]);
+  const [replicas, setReplicas] = useState<ReplicaInfo[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedKB, setSelectedKB] = useState<KnowledgeBaseInfo | null>(null);
+  const [creatingTemplate, setCreatingTemplate] = useState<string | null>(null); // replicaUuid being processed
 
   // Modal states
   const [showDetailsModal, setShowDetailsModal] = useState(false);
@@ -60,8 +67,8 @@ export function KnowledgeBaseList({ apiKey, replicaUuid, showActions = false }: 
       }
 
       // Enrich with replica names
-      const replicas = await replicaService.getAllReplicas();
-      const replicaMap = new Map(replicas.map(r => [r.uuid, r.name]));
+      const allReplicas = await replicaService.getAllReplicas();
+      const replicaMap = new Map(allReplicas.map(r => [r.uuid, r.name]));
 
       const enrichedKBs: EnrichedKnowledgeBase[] = kbList.map(kb => ({
         ...kb,
@@ -69,6 +76,7 @@ export function KnowledgeBaseList({ apiKey, replicaUuid, showActions = false }: 
       }));
 
       setKnowledgeBases(enrichedKBs);
+      setReplicas(allReplicas);
     } catch (error) {
       console.error('Error fetching knowledge bases:', error);
     } finally {
@@ -136,6 +144,34 @@ export function KnowledgeBaseList({ apiKey, replicaUuid, showActions = false }: 
     setKnowledgeBaseToDelete(null);
   };
 
+  const handleCreateDocumentationTemplate = async (targetReplicaUuid: string) => {
+    try {
+      setCreatingTemplate(targetReplicaUuid);
+
+      const docService = new DocumentationKnowledgeBaseService(apiKey);
+      const result = await docService.createDocumentationKnowledgeBase(targetReplicaUuid);
+
+      if (result) {
+        console.log('✅ Documentation template created:', result.id);
+        // Refresh knowledge bases to show the new template
+        await fetchKnowledgeBases();
+      } else {
+        console.error('Failed to create documentation template');
+      }
+    } catch (error) {
+      console.error('Error creating documentation template:', error);
+    } finally {
+      setCreatingTemplate(null);
+    }
+  };
+
+  const hasDocumentationKB = (targetReplicaUuid: string): boolean => {
+    return knowledgeBases.some(kb =>
+      kb.replicaUuid === targetReplicaUuid &&
+      kb.rawTextPreview?.includes('Segmante AI Agent - Application Documentation')
+    );
+  };
+
   if (loading) {
     return (
       <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur border border-slate-700 rounded-3xl p-8">
@@ -168,7 +204,8 @@ export function KnowledgeBaseList({ apiKey, replicaUuid, showActions = false }: 
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
+      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold text-white">Knowledge Bases</h2>
@@ -183,6 +220,128 @@ export function KnowledgeBaseList({ apiKey, replicaUuid, showActions = false }: 
           </Badge>
         </div>
       </div>
+
+      {/* Application Documentation Template Section */}
+      {!replicaUuid && replicas.length > 0 && (
+        <div className="bg-gradient-to-br from-purple-500/10 to-blue-500/10 backdrop-blur border border-purple-500/20 rounded-3xl p-8">
+          <div className="flex items-center space-x-4 mb-6">
+            <div className="flex items-center justify-center w-12 h-12 bg-purple-500/20 rounded-full">
+              <BookOpen className="w-6 h-6 text-purple-400" />
+            </div>
+            <div>
+              <h3 className="text-xl font-semibold text-white">Application Documentation Template</h3>
+              <p className="text-gray-300">
+                Add comprehensive application documentation to your replicas for enhanced AI understanding
+              </p>
+            </div>
+          </div>
+
+          <div className="bg-slate-800/30 rounded-2xl p-6 mb-6">
+            <h4 className="text-lg font-medium text-white mb-3">📋 What&apos;s Included:</h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-300">
+              <div className="space-y-2">
+                <div className="flex items-center space-x-2">
+                  <Settings className="w-4 h-4 text-blue-400" />
+                  <span>Shopify API integration guide</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Zap className="w-4 h-4 text-green-400" />
+                  <span>Smart intent detection examples</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Database className="w-4 h-4 text-purple-400" />
+                  <span>Structured query formats</span>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <div className="flex items-center space-x-2">
+                  <Bot className="w-4 h-4 text-yellow-400" />
+                  <span>AI agent guidelines</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <FileText className="w-4 h-4 text-orange-400" />
+                  <span>Command examples & responses</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <CheckCircle className="w-4 h-4 text-green-400" />
+                  <span>Best practices & safety</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <h4 className="text-lg font-medium text-white">🤖 Available Replicas:</h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {replicas.map((replica) => {
+                const hasDocKB = hasDocumentationKB(replica.uuid);
+                const isCreating = creatingTemplate === replica.uuid;
+
+                return (
+                  <div
+                    key={replica.uuid}
+                    className={`p-4 rounded-xl border ${
+                      hasDocKB
+                        ? 'bg-green-500/10 border-green-500/30'
+                        : 'bg-slate-800/30 border-slate-600 hover:border-blue-500/50'
+                    } transition-all duration-200`}
+                  >
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center space-x-3">
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                          hasDocKB ? 'bg-green-500/20' : 'bg-slate-700'
+                        }`}>
+                          <Bot className={`w-4 h-4 ${hasDocKB ? 'text-green-400' : 'text-gray-400'}`} />
+                        </div>
+                        <div>
+                          <h5 className="text-white font-medium text-sm">{replica.name}</h5>
+                          <p className="text-xs text-gray-400 truncate max-w-32">
+                            {replica.shortDescription}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <Badge
+                        variant="outline"
+                        className={`text-xs ${
+                          hasDocKB
+                            ? 'border-green-500/30 text-green-400'
+                            : 'border-gray-500/30 text-gray-400'
+                        }`}
+                      >
+                        {hasDocKB ? '✅ Documentation Ready' : '📝 Needs Documentation'}
+                      </Badge>
+                    </div>
+
+                    {!hasDocKB && (
+                      <Button
+                        onClick={() => handleCreateDocumentationTemplate(replica.uuid)}
+                        disabled={isCreating}
+                        className="w-full mt-3 bg-purple-600 hover:bg-purple-700 text-white"
+                        size="sm"
+                      >
+                        {isCreating ? (
+                          <>
+                            <Loader2 className="w-3 h-3 mr-2 animate-spin" />
+                            Creating...
+                          </>
+                        ) : (
+                          <>
+                            <Plus className="w-3 h-3 mr-2" />
+                            Add Documentation
+                          </>
+                        )}
+                      </Button>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 gap-4">
         {knowledgeBases.map((kb) => (

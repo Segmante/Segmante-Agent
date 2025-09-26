@@ -4,8 +4,10 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Bot, Store, User, Clock, MessageSquare, Zap, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
+import { Bot, Store, User, Clock, MessageSquare, Zap, CheckCircle, AlertCircle, Loader2, Edit, Settings } from 'lucide-react';
 import { ReplicaInfo, ReplicaService } from '@/lib/services/replica-service';
+import { ReplicaCRUDService, ReplicaCRUDInfo } from '@/lib/services/replica-crud-service';
+import { ReplicaEditModal } from '@/components/replica-edit-modal';
 import { UserSessionManager } from '@/lib/user-session';
 
 interface ReplicaListProps {
@@ -18,6 +20,8 @@ export function ReplicaList({ apiKey, onSelectReplica, showSelection = false }: 
   const [replicas, setReplicas] = useState<ReplicaInfo[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedReplicaUuid, setSelectedReplicaUuid] = useState<string | null>(null);
+  const [editingReplica, setEditingReplica] = useState<ReplicaCRUDInfo | null>(null);
+  const [showEditModal, setShowEditModal] = useState(false);
 
   useEffect(() => {
     fetchReplicas();
@@ -47,6 +51,34 @@ export function ReplicaList({ apiKey, onSelectReplica, showSelection = false }: 
     if (onSelectReplica) {
       onSelectReplica(replica);
     }
+  };
+
+  const handleEditReplica = async (replica: ReplicaInfo) => {
+    try {
+      const crudService = new ReplicaCRUDService(apiKey);
+      const detailedReplica = await crudService.getReplicaByUuid(replica.uuid);
+
+      if (detailedReplica) {
+        setEditingReplica(detailedReplica);
+        setShowEditModal(true);
+      }
+    } catch (error) {
+      console.error('Error fetching replica details for edit:', error);
+    }
+  };
+
+  const handleReplicaUpdated = (updatedReplica: ReplicaCRUDInfo) => {
+    // Update the replicas list with updated data
+    setReplicas(prev => prev.map(replica =>
+      replica.uuid === updatedReplica.uuid
+        ? { ...replica, ...updatedReplica }
+        : replica
+    ));
+  };
+
+  const handleCloseEditModal = () => {
+    setShowEditModal(false);
+    setEditingReplica(null);
   };
 
   const getReplicaTypeIcon = (type: string) => {
@@ -152,9 +184,22 @@ export function ReplicaList({ apiKey, onSelectReplica, showSelection = false }: 
                       </CardDescription>
                     </div>
                   </div>
-                  {isSelected && (
-                    <CheckCircle className="h-6 w-6 text-green-400 flex-shrink-0" />
-                  )}
+                  <div className="flex items-center space-x-2">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleEditReplica(replica);
+                      }}
+                      className="text-gray-400 hover:text-white hover:bg-slate-700 p-2"
+                    >
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                    {isSelected && (
+                      <CheckCircle className="h-6 w-6 text-green-400 flex-shrink-0" />
+                    )}
+                  </div>
                 </div>
               </CardHeader>
 
@@ -244,6 +289,16 @@ export function ReplicaList({ apiKey, onSelectReplica, showSelection = false }: 
           );
         })}
       </div>
+
+      {/* Edit Modal */}
+      {showEditModal && editingReplica && (
+        <ReplicaEditModal
+          replica={editingReplica}
+          apiKey={apiKey}
+          onClose={handleCloseEditModal}
+          onUpdated={handleReplicaUpdated}
+        />
+      )}
     </div>
   );
 }

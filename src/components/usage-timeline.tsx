@@ -10,16 +10,6 @@ export function UsageTimeline() {
       title: "Connect Your Shopify Store",
       content: (
         <div>
-          {/* Screenshot Placeholder */}
-          <div className="mb-8 rounded-lg overflow-hidden border border-slate-700">
-            <Image
-              src="/screenshot.png"
-              alt="Connect Shopify Store Step"
-              width={600}
-              height={400}
-              className="w-full h-auto"
-            />
-          </div>
           <p className="text-gray-300 text-sm md:text-sm font-normal mb-8">
             Enter your Shopify domain and private app token to securely connect your store.
             Our system will automatically sync your products, inventory, and customer data.
@@ -27,7 +17,7 @@ export function UsageTimeline() {
           <div className="grid grid-cols-2 gap-4">
             <div className="bg-slate-800/50 border border-slate-700 rounded-lg overflow-hidden">
               <Image
-                src="/screenshot.png"
+                src="/connect-form.png"
                 alt="Store Data - Products, variants, inventory"
                 width={300}
                 height={200}
@@ -36,7 +26,7 @@ export function UsageTimeline() {
             </div>
             <div className="bg-slate-800/50 border border-slate-700 rounded-lg overflow-hidden">
               <Image
-                src="/screenshot.png"
+                src="/store-conected.png"
                 alt="Secure Setup - Private app token authentication"
                 width={300}
                 height={200}
@@ -54,7 +44,7 @@ export function UsageTimeline() {
           {/* Screenshot Placeholder */}
           <div className="mb-8 rounded-lg overflow-hidden border border-slate-700">
             <Image
-              src="/screenshot.png"
+              src="/full-connect.png"
               alt="AI Knowledge Base Creation Step"
               width={600}
               height={400}
@@ -67,7 +57,7 @@ export function UsageTimeline() {
           </p>
           <div className="bg-slate-800/50 border border-slate-700 rounded-lg overflow-hidden">
             <Image
-              src="/screenshot.png"
+              src="/knowladge-connected.png"
               alt="AI Processing - Products analyzed: 1,247, Variants processed: 3,891, Knowledge vectors: 15,682"
               width={500}
               height={300}
@@ -84,7 +74,7 @@ export function UsageTimeline() {
           {/* Screenshot Placeholder */}
           <div className="mb-8 rounded-lg overflow-hidden border border-slate-700">
             <Image
-              src="/screenshot.png"
+              src="/launc-replica.png"
               alt="Launch AI Assistant Step"
               width={600}
               height={400}

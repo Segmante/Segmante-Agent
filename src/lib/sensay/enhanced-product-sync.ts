@@ -1,4 +1,4 @@
-import { VerboseSensayAPI } from '@/api-debug';
+import { VerboseSensayAPI } from '@/api-debug/VerboseSensayAPI';
 import { ProcessedProductData } from '../shopify/types';
 import { API_VERSION } from '@/constants/auth';
 import { SensayUserManager } from './user-manager';

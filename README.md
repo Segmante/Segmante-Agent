@@ -120,8 +120,8 @@ Would you like more details about either of these, or shall I show you other win
 
 1. **Clone and Install**
    ```bash
-   git clone https://github.com/your-username/segmante.git
-   cd segmante
+   git clone https://github.com/Segmante/Segmante-Agent.git
+   cd Segmante-Agent
    npm install
    ```
 
@@ -266,8 +266,8 @@ We're building the future of conversational commerce together:
 
 - **🌐 Live Demo**: [segmante-agent.vercel.app](https://segmante-agent.vercel.app)
 - **📧 Contact**: [team@segmante.com](mailto:team@segmante.com)
-- **🐛 Issues**: [GitHub Issues](https://github.com/your-username/segmante/issues)
-- **💬 Discussions**: [GitHub Discussions](https://github.com/your-username/segmante/discussions)
+- **🐛 Issues**: [GitHub Issues](https://github.com/Segmante/Segmante-Agent/issues)
+- **💬 Discussions**: [GitHub Discussions](https://github.com/Segmante/Segmante-Agent/discussions)
 
 ---
 
@@ -279,6 +279,6 @@ We're building the future of conversational commerce together:
 
 *Transforming e-commerce, one conversation at a time*
 
-**[🚀 Try Live Demo](https://segmante-agent.vercel.app) | [📖 View Documentation](./API.md) | [⭐ Star This Repo](https://github.com/your-username/segmante)**
+**[🚀 Try Live Demo](https://segmante-agent.vercel.app) | [📖 View Documentation](./API.md) | [⭐ Star This Repo](https://github.com/Segmante/Segmante-Agent)**
 
 </div>

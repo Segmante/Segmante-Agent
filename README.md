@@ -24,7 +24,7 @@
 
 ---
 
-## 🏆 **Hackathon Innovation Showcase**
+## 🏆 **Innovation Excellence Showcase**
 
 ### **🔬 Innovation & Creativity**
 
@@ -273,7 +273,7 @@ We're building the future of conversational commerce together:
 
 <div align="center">
 
-### **🏆 Built for Hackathon Excellence**
+### **🏆 Built for Innovation Excellence**
 
 **Innovation • User Experience • Real-World Impact • Sensay Mastery**
 

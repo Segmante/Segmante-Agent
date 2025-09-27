@@ -16,6 +16,7 @@ import {
 import { ShopifyConnectionStatus } from '@/lib/shopify/types';
 import { ShopifyConnectionPersistence } from '@/lib/shopify/connection-persistence';
 import { UserSessionManager } from '@/lib/user-session';
+import { EnhancedConnectionManager, ConnectionProgress } from '@/lib/shopify/enhanced-connection-manager';
 
 interface SmartConnectionFormProps {
   onConnectionSuccess?: (status: ShopifyConnectionStatus & {
@@ -47,6 +48,7 @@ const SmartConnectionForm: React.FC<SmartConnectionFormProps> = ({ onConnectionS
   const [connectionMode, setConnectionMode] = useState<'verify' | 'sync' | 'force-sync'>('verify');
   const [existingConnection, setExistingConnection] = useState<any>(null);
   const [progress, setProgress] = useState<{ message: string; percentage: number } | null>(null);
+  const [connectionRecommendations, setConnectionRecommendations] = useState<any>(null);
 
   const { register, handleSubmit, setValue, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(formSchema)
@@ -66,6 +68,24 @@ const SmartConnectionForm: React.FC<SmartConnectionFormProps> = ({ onConnectionS
       }
     }
   }, [setValue]);
+
+  // Get recommendations when domain changes
+  useEffect(() => {
+    const getRecommendations = async () => {
+      const domain = new URLSearchParams(window.location.search).get('domain');
+      if (domain) {
+        const sensayApiKey = process.env.NEXT_PUBLIC_SENSAY_API_KEY_SECRET;
+        if (sensayApiKey) {
+          const connectionManager = new EnhancedConnectionManager(sensayApiKey);
+          const recommendations = await connectionManager.getConnectionRecommendations(domain);
+          setConnectionRecommendations(recommendations);
+          setConnectionMode(recommendations.recommendedMode);
+        }
+      }
+    };
+
+    getRecommendations();
+  }, []);
 
   const getConnectionOptions = (): ConnectionOption[] => {
     const baseOptions: ConnectionOption[] = [
@@ -115,152 +135,62 @@ const SmartConnectionForm: React.FC<SmartConnectionFormProps> = ({ onConnectionS
     try {
       const formattedDomain = data.domain.replace(/^https?:\/\//, '').replace(/\/$/, '');
 
-      // Step 1: Always verify connection first
-      setProgress({ message: 'Verifying Shopify connection...', percentage: 20 });
+      // Get Sensay API key
+      const sensayApiKey = process.env.NEXT_PUBLIC_SENSAY_API_KEY_SECRET;
+      if (!sensayApiKey) {
+        throw new Error('AI service configuration error - API key not found');
+      }
 
-      const verifyResponse = await fetch('/api/shopify/verify-connection', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          domain: formattedDomain,
-          accessToken: data.accessToken
-        })
+      // Use Enhanced Connection Manager for better error handling
+      const connectionManager = new EnhancedConnectionManager(sensayApiKey);
+
+      const progressHandler = (progress: ConnectionProgress) => {
+        setProgress({
+          message: progress.message,
+          percentage: progress.percentage
+        });
+      };
+
+      // Smart connection with enhanced error handling
+      const connectionState = await connectionManager.smartConnect(
+        formattedDomain,
+        data.accessToken,
+        connectionMode,
+        progressHandler
+      );
+
+      // Success - notify parent component with debug logging
+      console.log(`💾 SmartConnectionForm: Saving connection state:`, {
+        productCount: connectionState.productCount,
+        knowledgeBaseId: connectionState.knowledgeBaseId,
+        replicaUuid: connectionState.replicaUuid,
+        userId: connectionState.userId
       });
 
-      if (!verifyResponse.ok) {
-        throw new Error('Failed to verify Shopify connection');
-      }
-
-      const verificationResult = await verifyResponse.json();
-      if (!verificationResult.connected) {
-        throw new Error(verificationResult.error || 'Connection verification failed');
-      }
-
-      // Update verification timestamp
-      ShopifyConnectionPersistence.updateLastVerified(formattedDomain);
-
-      // Step 2: Handle based on selected mode
-      if (connectionMode === 'verify') {
-        // Just verify and use existing knowledge base
-        setProgress({ message: 'Connection verified successfully!', percentage: 100 });
-
-        const connectionState = {
-          connected: true,
-          isConnected: true,
-          domain: formattedDomain,
-          shopName: verificationResult.shopName,
-          lastSync: existingConnection?.lastSync || new Date().toISOString(),
-          productCount: existingConnection?.productCount || 0,
-          knowledgeBaseId: existingConnection?.knowledgeBaseId,
-          replicaUuid: existingConnection?.replicaUuid,
-          userId: existingConnection?.userId,
-          wasSkipped: true
-        };
-
-        // Save updated connection state
-        ShopifyConnectionPersistence.saveConnection(connectionState);
-
-        setTimeout(() => {
-          onConnectionSuccess?.(connectionState);
-          setIsProcessing(false);
-        }, 1000);
-
-      } else {
-        // Perform sync (either smart sync or force sync)
-        setProgress({ message: 'Starting product synchronization...', percentage: 40 });
-
-        const syncEndpoint = connectionMode === 'force-sync'
-          ? '/api/shopify/sync-products-realtime'
-          : '/api/shopify/sync-products-realtime';
-
-        const response = await fetch(syncEndpoint, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            domain: formattedDomain,
-            accessToken: data.accessToken,
-            forceSync: connectionMode === 'force-sync',
-            existingKnowledgeBaseId: existingConnection?.knowledgeBaseId,
-            existingReplicaUuid: existingConnection?.replicaUuid
-          })
+      setTimeout(() => {
+        onConnectionSuccess?.({
+          ...connectionState,
+          connected: connectionState.isConnected // backwards compatibility
         });
-
-        if (!response.ok) {
-          throw new Error('Failed to start sync process');
-        }
-
-        // Handle streaming response
-        const reader = response.body?.getReader();
-        if (!reader) throw new Error('Stream not available');
-
-        const decoder = new TextDecoder();
-        let buffer = '';
-
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-
-          buffer += decoder.decode(value, { stream: true });
-          const lines = buffer.split('\n');
-          buffer = lines.pop() || '';
-
-          for (const line of lines) {
-            if (line.startsWith('data: ')) {
-              try {
-                const progressData = JSON.parse(line.slice(6));
-                setProgress({
-                  message: progressData.message,
-                  percentage: progressData.progress
-                });
-
-                if (progressData.type === 'success') {
-                  const connectionState = {
-                    connected: true,
-                    isConnected: true,
-                    domain: formattedDomain,
-                    shopName: verificationResult.shopName,
-                    lastSync: new Date().toISOString(),
-                    productCount: progressData.productCount,
-                    knowledgeBaseId: progressData.knowledgeBaseId,
-                    replicaUuid: progressData.replicaUuid,
-                    userId: progressData.userId
-                  };
-
-                  ShopifyConnectionPersistence.saveConnection(connectionState);
-
-                  // CRITICAL: Save user session so chat interface can access replica
-                  if (progressData.replicaUuid && progressData.userId) {
-                    UserSessionManager.saveUserSession({
-                      userId: progressData.userId,
-                      replicaUuid: progressData.replicaUuid,
-                      shopifyDomain: formattedDomain,
-                      storeName: verificationResult.shopName,
-                      createdAt: new Date().toISOString()
-                    });
-                    console.log('💾 User session saved for chat interface access');
-                  }
-
-                  setTimeout(() => {
-                    onConnectionSuccess?.(connectionState);
-                    setIsProcessing(false);
-                  }, 2000);
-                  return;
-                }
-
-                if (progressData.type === 'error') {
-                  throw new Error(progressData.message);
-                }
-              } catch (error) {
-                console.error('Error parsing progress data:', error);
-              }
-            }
-          }
-        }
-      }
+        setIsProcessing(false);
+      }, 1000);
 
     } catch (error: any) {
-      console.error('Connection error:', error);
-      setProgress({ message: error.message || 'Connection failed', percentage: 0 });
+      console.error('Enhanced connection error:', error);
+
+      // More descriptive error messages
+      let errorMessage = error.message || 'Connection failed';
+
+      if (errorMessage.includes('User, email, or linked account already exists')) {
+        errorMessage = 'Setting up AI assistant - this may take a moment...';
+        // Retry logic is now handled in EnhancedConnectionManager
+      } else if (errorMessage.includes('AI service configuration error')) {
+        errorMessage = 'AI service configuration error - please check your setup';
+      } else if (errorMessage.includes('Connection verification failed')) {
+        errorMessage = 'Invalid Shopify credentials - please check your domain and access token';
+      }
+
+      setProgress({ message: errorMessage, percentage: 0 });
       setTimeout(() => setIsProcessing(false), 3000);
     }
   };

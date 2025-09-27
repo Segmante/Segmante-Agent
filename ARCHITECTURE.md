@@ -1,12 +1,29 @@
-# 🏗️ **Segmante System Architecture**
+# Segmante - System Architecture & Technical Specifications
 
-*Comprehensive architectural overview of the Segmante Shopify AI Agent system*
+<div align="center">
+
+![Architecture Banner](https://img.shields.io/badge/Architecture-Enterprise%20Grade-blue?style=for-the-badge)
+![Next.js](https://img.shields.io/badge/Next.js-14.2.28-black?style=for-the-badge&logo=next.js)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.3+-blue?style=for-the-badge&logo=typescript)
+![Sensay](https://img.shields.io/badge/Powered%20by-Sensay%20AI-purple?style=for-the-badge)
+
+**Modern, Scalable, Production-Ready E-commerce AI Architecture**
+
+</div>
 
 ---
 
-## 🎯 **Architecture Overview**
+## 🏗️ **System Overview**
 
-Segmante is built on a modern, scalable architecture that seamlessly integrates Shopify stores with advanced AI capabilities through the Sensay platform. The system follows a microservices-inspired approach with clear separation of concerns.
+Segmante implements a sophisticated three-tier architecture that seamlessly integrates Shopify's e-commerce platform with Sensay's advanced AI capabilities, delivering an intelligent conversational commerce experience.
+
+### **Core Architecture Principles**
+
+- **Microservices Design**: Modular, loosely-coupled services for maximum scalability
+- **Event-Driven Processing**: Real-time synchronization with streaming progress updates
+- **RAG-First Approach**: Vector-based knowledge retrieval for accurate product intelligence
+- **Fault-Tolerant Systems**: Comprehensive error handling with exponential backoff retry mechanisms
+- **Progressive Enhancement**: Graceful degradation ensuring functionality across all environments
 
 ```mermaid
 graph TB

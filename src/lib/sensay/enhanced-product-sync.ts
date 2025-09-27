@@ -128,7 +128,24 @@ export class EnhancedProductSyncService {
         progress: 35
       });
 
+      console.log(`📊 Formatting ${products.length} products for knowledge base...`);
+
+      // Validate products data before formatting
+      if (!products || products.length === 0) {
+        throw new Error('No products provided to sync - check Shopify product fetch');
+      }
+
       const { rawText, generatedFacts } = this.formatEnhancedProductData(products, storeName || shopifyDomain);
+
+      console.log(`📝 Generated knowledge base content:`);
+      console.log(`   - Length: ${rawText.length} characters`);
+      console.log(`   - Facts: ${generatedFacts.length}`);
+      console.log(`   - Sample: ${rawText.substring(0, 200)}...`);
+
+      if (rawText.length < 100) {
+        console.warn('⚠️ Warning: Knowledge base content is very short!');
+        console.log('Raw text:', rawText);
+      }
 
       // Stage 4: Upload or update product data
       const uploadProgress = isUpdate ? 50 : 45;
@@ -176,6 +193,10 @@ export class EnhancedProductSyncService {
       }
 
       // Upload data to knowledge base (both new and updated)
+      console.log(`📤 Uploading to knowledge base ${knowledgeBaseId}...`);
+      console.log(`   - Replica UUID: ${replicaUuid}`);
+      console.log(`   - Content size: ${rawText.length} characters`);
+
       const uploadResponse = await this.sensayClient.training.putV1ReplicasTraining(
         replicaUuid,
         knowledgeBaseId,
@@ -184,11 +205,19 @@ export class EnhancedProductSyncService {
         }
       );
 
+      console.log(`📤 Upload response:`, {
+        success: uploadResponse.success,
+        // Note: uploadResponse may not have status/error properties in all cases
+        ...(uploadResponse as any).status && { status: (uploadResponse as any).status },
+        ...(uploadResponse as any).error && { error: (uploadResponse as any).error }
+      });
+
       if (!uploadResponse.success) {
-        throw new Error('Failed to upload product data');
+        const errorMsg = (uploadResponse as any).error || 'Unknown error';
+        throw new Error(`Failed to upload product data: ${errorMsg}`);
       }
 
-      console.log(`Product data ${isUpdate ? 'updated' : 'uploaded'} successfully`);
+      console.log(`✅ Product data ${isUpdate ? 'updated' : 'uploaded'} successfully to KB ${knowledgeBaseId}`);
 
       // Stage 5: Monitor processing
       onProgress?.({
@@ -325,15 +354,38 @@ export class EnhancedProductSyncService {
     products: ProcessedProductData[],
     storeName: string
   ): { rawText: string; generatedFacts: string[] } {
+    console.log(`🎨 Formatting enhanced product data:`);
+    console.log(`   - Products to format: ${products.length}`);
+    console.log(`   - Store name: ${storeName}`);
+
+    if (!products || products.length === 0) {
+      console.warn('⚠️ No products to format!');
+      return {
+        rawText: `# ${storeName} - Empty Store\n\nNo products found in this store.`,
+        generatedFacts: ['Store has no products']
+      };
+    }
+    // Safe extraction with fallbacks
+    const productTypes = [...new Set(products.map(p => p.productType || 'Uncategorized').filter(Boolean))];
+    const vendors = [...new Set(products.map(p => p.vendor || 'Unknown').filter(Boolean))];
+    const prices = products.map(p => parseFloat(p.price || '0')).filter(p => p > 0);
+    const minPrice = prices.length > 0 ? Math.min(...prices) : 0;
+    const maxPrice = prices.length > 0 ? Math.max(...prices) : 0;
+    const totalInventory = products.reduce((sum, p) => sum + (p.inventory?.available || 0), 0);
+    const inStock = products.filter(p => (p.inventory?.available || 0) > 0).length;
+    const outOfStock = products.length - inStock;
+
     const generatedFacts = [
       `Store has ${products.length} total products`,
-      `Product categories: ${[...new Set(products.map(p => p.productType).filter(Boolean))].join(', ')}`,
-      `Available vendors: ${[...new Set(products.map(p => p.vendor).filter(Boolean))].join(', ')}`,
-      `Price range: $${Math.min(...products.map(p => parseFloat(p.price)))} - $${Math.max(...products.map(p => parseFloat(p.price)))}`,
-      `Total inventory items: ${products.reduce((sum, p) => sum + p.inventory.available, 0)}`,
-      `Products in stock: ${products.filter(p => p.inventory.available > 0).length}`,
-      `Products out of stock: ${products.filter(p => p.inventory.available === 0).length}`
+      `Product categories: ${productTypes.slice(0, 10).join(', ') || 'No categories'}`,
+      `Available vendors: ${vendors.slice(0, 10).join(', ') || 'No vendors'}`,
+      `Price range: $${minPrice.toFixed(2)} - $${maxPrice.toFixed(2)}`,
+      `Total inventory items: ${totalInventory}`,
+      `Products in stock: ${inStock}`,
+      `Products out of stock: ${outOfStock}`
     ];
+
+    console.log(`📊 Generated facts:`, generatedFacts);
 
     const header = `
 # ${storeName} - AI Product Knowledge Base
@@ -353,7 +405,12 @@ ${generatedFacts.map(fact => `- ${fact}`).join('\n')}
 
 `;
 
-    const productData = products.map(product => {
+    console.log(`🏷️ Processing ${products.length} products...`);
+
+    const productData = products.map((product, index) => {
+      if (index < 3) {
+        console.log(`   Processing product ${index + 1}: ${product.title}`);
+      }
       const variantInfo = product.variants.length > 1
         ? product.variants.map(variant => {
             const stock = variant.inventory > 0
@@ -368,9 +425,9 @@ ${generatedFacts.map(fact => `- ${fact}`).join('\n')}
           }).join('\n')
         : `**Price**: $${product.price}${product.compareAtPrice ? ` (was $${product.compareAtPrice})` : ''} - ${product.inventory.available > 0 ? `${product.inventory.available} in stock` : 'Out of stock'}${product.sku ? ` (SKU: ${product.sku})` : ''}`;
 
-      const description = product.description.length > 500
+      const description = (product.description && product.description.length > 500)
         ? product.description.substring(0, 500) + '...'
-        : product.description;
+        : (product.description || 'No description available');
 
       return `
 ## ${product.title}
@@ -434,8 +491,16 @@ When customers inquire about products:
 - Always encourage customers to check the store for the most current information
     `.trim();
 
+    const finalRawText = header + productData + footer;
+
+    console.log(`✅ Formatting complete:`);
+    console.log(`   - Header length: ${header.length}`);
+    console.log(`   - Product data length: ${productData.length}`);
+    console.log(`   - Footer length: ${footer.length}`);
+    console.log(`   - Total length: ${finalRawText.length}`);
+
     return {
-      rawText: header + productData + footer,
+      rawText: finalRawText,
       generatedFacts
     };
   }

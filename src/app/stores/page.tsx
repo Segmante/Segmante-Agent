@@ -23,6 +23,7 @@ export default function StoresPage() {
   // Load connection state on mount
   useEffect(() => {
     const summary = ShopifyConnectionPersistence.getConnectionSummary();
+    console.log(`📊 Stores Page: Loaded connection summary:`, summary);
     setConnectionSummary(summary);
 
     if (summary.isConnected) {
@@ -49,8 +50,9 @@ export default function StoresPage() {
     setSyncResults(status);
     setShowConnectionForm(false);
 
-    // Update connection summary
+    // Update connection summary with debug logging
     const summary = ShopifyConnectionPersistence.getConnectionSummary();
+    console.log(`🔄 Stores Page: Updated connection summary after success:`, summary);
     setConnectionSummary(summary);
 
     // Show celebration if products were synced (not just verified)

@@ -1,12 +1,21 @@
-# 📚 **Segmante API Documentation**
+# Segmante - API Documentation & Integration Guide
 
-*Comprehensive API reference for Segmante Shopify AI Agent integrations*
+<div align="center">
+
+![API Documentation](https://img.shields.io/badge/API-Documentation-green?style=for-the-badge)
+![Shopify](https://img.shields.io/badge/Shopify-Admin%20API-96BF47?style=for-the-badge&logo=shopify)
+![Sensay](https://img.shields.io/badge/Sensay-AI%20Platform-purple?style=for-the-badge)
+![RESTful](https://img.shields.io/badge/RESTful-APIs-blue?style=for-the-badge)
+
+**Comprehensive API Reference for Enterprise E-commerce AI Integration**
+
+</div>
 
 ---
 
-## 🎯 **Overview**
+## 🎯 **API Overview**
 
-This document provides detailed information about all APIs used in the Segmante system, including both **Sensay AI Platform** and **Shopify Admin API** integrations. Each API is documented with endpoints, authentication, request/response formats, and practical examples.
+Segmante leverages two primary API ecosystems to deliver intelligent conversational commerce: **Sensay AI Platform** for advanced artificial intelligence capabilities and **Shopify Admin API** for comprehensive e-commerce data management. This documentation provides complete integration specifications, authentication protocols, and practical implementation examples.
 
 ---
 

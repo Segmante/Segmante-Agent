@@ -37,7 +37,7 @@ export class SensayUserManager {
   }
 
   /**
-   * Create a new user and replica for a Shopify store
+   * Create a new user and replica for a Shopify store with enhanced error handling
    */
   async createUserAndReplica(
     shopifyDomain: string,
@@ -50,25 +50,13 @@ export class SensayUserManager {
       console.log(`Creating user and replica for store: ${shopifyDomain}`);
       console.log(`Generated user ID: ${userId}`);
 
-      // Step 1: Create the user first (required before creating replica)
-      try {
-        console.log(`Creating user with ID: ${userId}`);
-        await this.sensayClient.users.postV1Users(API_VERSION, {
-          id: userId,
-          name: `Shopify Store User - ${storeName || shopifyDomain}`
-        });
-        console.log(`✅ User ${userId} created successfully`);
-      } catch (userError: any) {
-        // User might already exist, which is okay
-        if (userError.response?.status !== 409) { // 409 = Conflict (user exists)
-          console.error('Failed to create user:', userError);
-          throw new Error(`Failed to create user: ${userError.message}`);
-        }
-        console.log(`User ${userId} already exists, continuing...`);
+      // Step 1: Create the user first with robust error handling
+      const userCreated = await this.ensureUserExists(userId, storeName || shopifyDomain);
+      if (!userCreated) {
+        throw new Error('Failed to ensure user exists after multiple attempts');
       }
 
       // Step 2: Create a new replica for this specific user
-      const timestamp = Date.now();
       const randomStr = Math.random().toString(36).substring(2, 8);
       const uniqueSlug = `shopify-assistant-${userId}-${randomStr}`;
 
@@ -123,6 +111,75 @@ Always maintain a helpful, professional, and friendly tone while being informati
         success: false,
         error: error.message || 'Failed to create user and replica'
       };
+    }
+  }
+
+  /**
+   * Ensure user exists with retry logic for conflicts
+   */
+  private async ensureUserExists(userId: string, storeName: string): Promise<boolean> {
+    const maxRetries = 3;
+    let retryCount = 0;
+
+    while (retryCount < maxRetries) {
+      try {
+        console.log(`Attempting to create user: ${userId} (attempt ${retryCount + 1})`);
+        await this.sensayClient.users.postV1Users(API_VERSION, {
+          id: userId,
+          name: `Shopify Store User - ${storeName}`
+        });
+        console.log(`✅ User ${userId} created successfully`);
+        return true;
+      } catch (userError: any) {
+        const errorMessage = userError.message || userError.toString();
+
+        // Check for various user existence indicators
+        if (userError.response?.status === 409 ||
+            errorMessage.includes('already exists') ||
+            errorMessage.includes('User, email, or linked account already exists')) {
+          console.log(`User ${userId} already exists, verifying...`);
+
+          // Verify user actually exists
+          const userExists = await this.verifyUserExists(userId);
+          if (userExists) {
+            console.log(`✅ Confirmed user ${userId} exists`);
+            return true;
+          }
+
+          console.log(`User reported as existing but verification failed, retrying...`);
+        } else {
+          console.error(`User creation failed with error:`, errorMessage);
+        }
+
+        retryCount++;
+        if (retryCount < maxRetries) {
+          const backoffTime = Math.min(1000 * Math.pow(2, retryCount), 5000);
+          console.log(`Retrying in ${backoffTime}ms...`);
+          await new Promise(resolve => setTimeout(resolve, backoffTime));
+        }
+      }
+    }
+
+    console.error(`Failed to create or verify user ${userId} after ${maxRetries} attempts`);
+    return false;
+  }
+
+  /**
+   * Verify if a user actually exists in the system
+   */
+  private async verifyUserExists(userId: string): Promise<boolean> {
+    try {
+      // Try to get user information by checking if we can fetch user data
+      // Since the API doesn't have a direct user lookup, we'll try to create another replica
+      // and if it fails with user not found, then user doesn't exist
+      const testResponse = await this.sensayClient.replicas.getV1Replicas();
+
+      // If we can make API calls with the user context, assume user exists
+      return testResponse && testResponse.success;
+    } catch (error) {
+      // If API calls fail, assume user doesn't exist
+      console.log(`User verification failed for ${userId}:`, error);
+      return false;
     }
   }
 

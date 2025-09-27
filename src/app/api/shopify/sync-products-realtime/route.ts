@@ -65,9 +65,23 @@ export async function POST(request: NextRequest) {
           });
 
           const products = await shopifyClient.getAllProducts();
+          console.log(`📦 Fetched ${products.length} raw products from Shopify`);
+
           const processedProducts = shopifyClient.processProductData(products);
+          console.log(`⚙️ Processed ${processedProducts.length} products for sync`);
+
+          // Debug: Log first product if available
+          if (processedProducts.length > 0) {
+            console.log(`🔍 Sample product:`, {
+              title: processedProducts[0].title,
+              price: processedProducts[0].price,
+              hasDescription: !!processedProducts[0].description,
+              variants: processedProducts[0].variants.length
+            });
+          }
 
           if (processedProducts.length === 0) {
+            console.warn('⚠️ No products to sync - store might be empty or have permissions issue');
             sendMessage({
               type: 'success',
               message: 'Store connected successfully! No products found to sync.',
@@ -101,6 +115,11 @@ export async function POST(request: NextRequest) {
           const syncService = new EnhancedProductSyncService(sensayApiKey);
           const storeName = connectionStatus.shopName;
 
+          console.log(`🚀 Starting sync with EnhancedProductSyncService:`);
+          console.log(`   - Products: ${processedProducts.length}`);
+          console.log(`   - Store: ${storeName}`);
+          console.log(`   - Domain: ${domain}`);
+
           const syncResult = await syncService.syncProductsToKnowledgeBase(
             processedProducts,
             domain,
@@ -108,6 +127,7 @@ export async function POST(request: NextRequest) {
             storeName,
             // Real-time progress callback - this is the key fix!
             (progressUpdate) => {
+              console.log(`📊 Progress: ${progressUpdate.stage} - ${progressUpdate.message} (${progressUpdate.progress}%)`);
               sendMessage({
                 type: 'progress',
                 stage: progressUpdate.stage,
@@ -116,6 +136,15 @@ export async function POST(request: NextRequest) {
               });
             }
           );
+
+          console.log(`🏁 Sync result:`, {
+            success: syncResult.success,
+            error: syncResult.error,
+            knowledgeBaseId: syncResult.knowledgeBaseId,
+            userId: syncResult.userId,
+            replicaUuid: syncResult.replicaUuid,
+            productCount: syncResult.productCount
+          });
 
           // Send final result
           if (syncResult.success) {

@@ -3,8 +3,7 @@ import { ReplicaService } from '@/lib/services/replica-service';
 
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
-    const type = searchParams.get('type'); // 'all', 'shopify', or 'knowledge'
+    const type = request.nextUrl.searchParams.get('type'); // 'all', 'shopify', or 'knowledge'
 
     const sensayApiKey = process.env.NEXT_PUBLIC_SENSAY_API_KEY_SECRET;
     if (!sensayApiKey) {

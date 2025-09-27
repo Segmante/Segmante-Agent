@@ -1,6 +1,8 @@
+<div align="center">
+
 # Segmante - Intelligent Shopify AI Agent
 
-<div align="center">
+<img src="./public/segmante-logo.png" alt="Segmante Logo" width="200" height="auto" style="margin: 20px 0;"/>
 
 ![Segmante Banner](https://img.shields.io/badge/Segmante-Award%20Winning%20AI%20Agent-gold?style=for-the-badge)
 ![Next.js](https://img.shields.io/badge/Next.js-14.2.28-black?style=for-the-badge&logo=next.js)
@@ -10,6 +12,13 @@
 **🚀 [Live Demo](https://segmante-agent.vercel.app) | 📚 [API Documentation](./API.md) | 🏗️ [Architecture](./ARCHITECTURE.md)**
 
 *Revolutionizing e-commerce with conversational AI that transforms static product catalogs into intelligent, responsive shopping experiences*
+
+### **🤝 Powered By Leading Platforms**
+
+<div style="display: flex; align-items: center; justify-content: center; gap: 30px; margin: 20px 0;">
+  <img src="./public/sensay-logo.jpg" alt="Sensay AI Platform" width="120" height="auto"/>
+  <img src="https://hybrid.co.id/wp-content/uploads/2017/08/1d5830876de8d26a20ba94dd2cb7d2f3_Logo-Shopify-Platform-Toko-Online.png" alt="Shopify Platform" width="120" height="auto"/>
+</div>
 
 </div>
 
@@ -184,7 +193,7 @@ const syncResult = await this.syncService.syncProductsToKnowledgeBase(
 ### **Mission Statement**
 *"Democratize intelligent commerce by making enterprise-grade conversational AI accessible to every business, regardless of size or technical expertise."*
 
-### **Vision 2024-2025**
+### **Vision 2025-2027**
 *"Become the global standard for AI-powered e-commerce interactions, transforming how customers discover, explore, and purchase products online."*
 
 ---
@@ -197,19 +206,19 @@ const syncResult = await this.syncService.syncProductsToKnowledgeBase(
 - **Real-time Synchronization**: Live progress tracking and error recovery
 - **Professional UI/UX**: Modern interface with responsive design
 
-### **Phase 2: Automation 🚧 (Q1 2024 - In Development)**
+### **Phase 2: Automation 🚧 (Q1 2026 - In Development)**
 - **Smart Actions**: Automated inventory updates and pricing adjustments
 - **Workflow Engine**: Custom automation rules based on conversation triggers
 - **Advanced Analytics**: Customer behavior insights and conversion tracking
 - **Multi-Platform APIs**: Extended integrations beyond Shopify
 
-### **Phase 3: Ecosystem Expansion 🔮 (Q2-Q3 2024)**
+### **Phase 3: Ecosystem Expansion 🔮 (Q2-Q3 2026)**
 - **Complete Shopify Integration**: Orders, customers, analytics, financial data
 - **Platform Diversity**: WooCommerce, Magento, BigCommerce support
 - **Predictive Intelligence**: AI-powered trend forecasting and inventory optimization
 - **Enterprise Features**: White-label solutions and custom deployment options
 
-### **Phase 4: Market Leadership 🎯 (Q4 2024 & Beyond)**
+### **Phase 4: Market Leadership 🎯 (Q4 2026 & Beyond)**
 - **Global Marketplace**: Community-driven AI agent templates
 - **Industry Specialization**: Vertical-specific solutions (fashion, electronics, health)
 - **Omnichannel Experience**: Unified AI across web, mobile, social, voice platforms

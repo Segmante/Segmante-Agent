@@ -182,7 +182,7 @@ export default function StoresPage() {
             className={`${
               activeTab === 'connection'
                 ? 'bg-blue-600 hover:bg-blue-700 text-white'
-                : 'border-slate-600 text-gray-300 hover:bg-slate-700 hover:text-white'
+                : 'border-slate-600 hover:bg-slate-700 hover:text-white'
             }`}
           >
             <Store className="h-4 w-4 mr-2" />
@@ -194,7 +194,7 @@ export default function StoresPage() {
             className={`${
               activeTab === 'replicas'
                 ? 'bg-blue-600 hover:bg-blue-700 text-white'
-                : 'border-slate-600 text-gray-300 hover:bg-slate-700 hover:text-white'
+                : 'border-slate-600 hover:bg-slate-700 hover:text-white'
             }`}
           >
             <Bot className="h-4 w-4 mr-2" />
@@ -206,7 +206,7 @@ export default function StoresPage() {
             className={`${
               activeTab === 'knowledge'
                 ? 'bg-blue-600 hover:bg-blue-700 text-white'
-                : 'border-slate-600 text-gray-300 hover:bg-slate-700 hover:text-white'
+                : 'border-slate-600 hover:bg-slate-700 hover:text-white'
             }`}
           >
             <Database className="h-4 w-4 mr-2" />

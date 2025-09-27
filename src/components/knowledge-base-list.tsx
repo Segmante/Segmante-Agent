@@ -440,7 +440,7 @@ export function KnowledgeBaseList({ apiKey, replicaUuid, showActions = false }: 
                   <Button
                     variant="outline"
                     size="sm"
-                    className="border-slate-600 text-gray-300 hover:bg-slate-700"
+                    className="border-slate-600 hover:bg-slate-700"
                     onClick={() => handleViewDetails(kb)}
                   >
                     <Eye className="h-4 w-4 mr-2" />
@@ -463,7 +463,7 @@ export function KnowledgeBaseList({ apiKey, replicaUuid, showActions = false }: 
                   <Button
                     variant="outline"
                     size="sm"
-                    className="border-red-500/30 text-red-400 hover:bg-red-500/10 ml-auto"
+                    className="border-red-500/30 hover:bg-red-500 ml-auto"
                     onClick={() => handleDeleteClick(kb)}
                   >
                     <Trash2 className="h-4 w-4 mr-2" />

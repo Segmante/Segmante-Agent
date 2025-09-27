@@ -179,7 +179,7 @@ const SyncSuccessCelebration: React.FC<SyncSuccessCelebrationProps> = ({
 
         <Button
           variant="outline"
-          className="border-slate-600 text-gray-300 hover:bg-slate-700 hover:text-white px-8 py-3"
+          className="border-slate-600 hover:bg-slate-700 hover:text-white px-8 py-3"
         >
           <Store className="w-4 h-4 mr-2" />
           Manage Store

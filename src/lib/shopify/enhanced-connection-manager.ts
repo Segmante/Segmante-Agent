@@ -1,7 +1,6 @@
 import { ShopifyConnectionPersistence } from './connection-persistence';
 import { UserSessionManager } from '@/lib/user-session';
 import { SensayUserManager } from '@/lib/sensay/user-manager';
-import { EnhancedProductSyncService } from '@/lib/sensay/enhanced-product-sync';
 
 export interface ConnectionState {
   connected: boolean;
@@ -25,11 +24,9 @@ export interface ConnectionProgress {
 
 export class EnhancedConnectionManager {
   private userManager: SensayUserManager;
-  private syncService: EnhancedProductSyncService;
 
   constructor(apiKey: string) {
     this.userManager = new SensayUserManager(apiKey);
-    this.syncService = new EnhancedProductSyncService(apiKey);
   }
 
   /**
@@ -160,31 +157,24 @@ export class EnhancedConnectionManager {
   ): Promise<ConnectionState> {
     onProgress?.({ message: 'Fetching products from Shopify...', percentage: 30, stage: 'syncing' });
 
-    // Fetch products first using ShopifyClient
-    const { ShopifyClient } = await import('@/lib/shopify/client');
-    const shopifyClient = new ShopifyClient({ domain, accessToken });
+    // Use server-side API route to avoid CORS issues
+    const response = await fetch('/api/shopify/sync-products', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        domain,
+        accessToken
+      })
+    });
 
-    const rawProducts = await shopifyClient.getAllProducts();
-    const processedProducts = shopifyClient.processProductData(rawProducts);
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error || 'Failed to sync products');
+    }
 
-    console.log(`🛒 Enhanced Manager: Fetched ${processedProducts.length} products for sync`);
-
-    onProgress?.({ message: 'Starting product synchronization...', percentage: 40, stage: 'syncing' });
-
-    // Use the enhanced sync service with actual product data
-    const syncResult = await this.syncService.syncProductsToKnowledgeBase(
-      processedProducts, // Pass actual products, not empty array
-      domain,
-      accessToken,
-      shopName,
-      (syncProgress) => {
-        onProgress?.({
-          message: syncProgress.message,
-          percentage: 40 + (syncProgress.progress * 0.6), // Map 0-100 to 40-100
-          stage: 'syncing'
-        });
-      }
-    );
+    const syncResult = await response.json();
 
     if (!syncResult.success) {
       throw new Error(syncResult.error || 'Product synchronization failed');
@@ -192,10 +182,7 @@ export class EnhancedConnectionManager {
 
     onProgress?.({ message: 'Synchronization completed!', percentage: 100, stage: 'completed' });
 
-    // Ensure we return the actual product count from processed products
-    const finalProductCount = syncResult.productCount || processedProducts.length || 0;
-
-    console.log(`📊 Enhanced Manager: Returning productCount=${finalProductCount}`);
+    console.log(`📊 Enhanced Manager: Returning productCount=${syncResult.productCount}`);
 
     return {
       connected: true,
@@ -203,10 +190,10 @@ export class EnhancedConnectionManager {
       domain,
       shopName,
       lastSync: new Date().toISOString(),
-      productCount: finalProductCount,
+      productCount: syncResult.productCount || 0,
       knowledgeBaseId: syncResult.knowledgeBaseId,
-      replicaUuid,
-      userId,
+      replicaUuid: syncResult.replicaUuid || replicaUuid,
+      userId: syncResult.userId || userId,
       hasReplica: true
     };
   }

@@ -31,7 +31,7 @@ export function SuperMemoryNavbar() {
           </Link>
 
           {/* Navigation Items */}
-          <NavItems items={navigationItems} className="text-gray-300" />
+          <NavItems items={navigationItems} />
 
           {/* Right side actions */}
           <div className="flex items-center space-x-4 relative z-20">
@@ -40,7 +40,7 @@ export function SuperMemoryNavbar() {
 
 
             {/* CTA Button */}
-            <Button className="bg-white text-black hover:bg-gray-100 font-medium px-6 py-2 rounded-lg">
+            <Button className="bg-blue-600 text-white hover:bg-blue-700 font-medium px-6 py-2 rounded-lg">
               Get Started →
             </Button>
           </div>
@@ -67,7 +67,7 @@ export function SuperMemoryNavbar() {
             />
           </MobileNavHeader>
 
-          <MobileNavMenu isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)}>
+          <MobileNavMenu isOpen={isMenuOpen}>
             {navigationItems.map((item, idx) => (
               <Link
                 key={idx}
